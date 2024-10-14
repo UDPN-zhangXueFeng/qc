@@ -73,11 +73,12 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
-import { useRouter } from "vue-router";
+import { useRouter,useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
 import request from "@/utils/request"; // 导入 request
 
 const router = useRouter();
+const route = useRoute();
 const formRef = ref<FormInstance>();
 
 const form = reactive({
@@ -125,7 +126,8 @@ const submitForm = async () => {
 
         if (response.code === 1) {
           ElMessage.success('任务下发成功');
-          router.push('/'); // 提交成功后跳转到首页
+          // router.push('/'); // 提交成功后跳转到首页
+          router.push(`/qc-create/${response.data.task_id}/${route.params.id}`);
         } else {
           ElMessage.error(response.msg || '任务下发失败');
         }
