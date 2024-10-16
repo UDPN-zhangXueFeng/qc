@@ -36,14 +36,19 @@
             <span>通知信息填写</span>
           </div>
         </template>
-        <el-form :model="noticeForm" label-width="120px">
-          <el-form-item label="质控通知单号" required>
+        <el-form
+          ref="noticeFormRef"
+          :model="noticeForm"
+          :rules="rules"
+          label-width="120px"
+        >
+          <el-form-item label="质控通知单号" prop="notice_number" required>
             <el-input
               v-model="noticeForm.notice_number"
               placeholder="请输入质控通知单号"
             ></el-input>
           </el-form-item>
-          <el-form-item label="有关科室" required>
+          <el-form-item label="有关科室" prop="related_offices" required>
             <el-checkbox-group v-model="noticeForm.related_offices">
               <el-checkbox label="原控室"></el-checkbox>
               <el-checkbox label="采样室"></el-checkbox>
@@ -90,6 +95,7 @@
               <el-select
                 v-model="scope.row.quality_control"
                 placeholder="请选择"
+                @change="handleQualityControlChange(scope.row)"
               >
                 <el-option
                   label="现场平行样/批"
@@ -101,7 +107,24 @@
                 ></el-option>
                 <el-option label="密码样/批" value="密码样/批"></el-option>
                 <el-option label="自定义" value="custom"></el-option>
+                <el-option
+                  v-for="option in dynamicOptions"
+                  :key="option"
+                  :label="option"
+                  :value="option"
+                ></el-option>
               </el-select>
+              <el-input
+              class="mt-3"
+                v-if="scope.row.quality_control === 'custom'"
+                v-model="scope.row.customOption"
+                placeholder="请输入自定义选项"
+                @keyup.enter="addCustomOption(scope.row)"
+              >
+                <template #append>
+                  <el-button @click="addCustomOption(scope.row)">添加</el-button>
+                </template>
+              </el-input>
             </template>
           </el-table-column>
           <el-table-column prop="note" label="备注">
@@ -167,8 +190,7 @@
     </div>
     <SlidingPanel 
       v-model="panelVisible"
-      @confirm="handleConfirm"
-      @cancel="handleCancel"
+      @confirm="handlePanelConfirm"
     />
     <div class="fixed-bottom">
       <div class="button-container">
@@ -184,6 +206,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
+import type { FormInstance } from "element-plus";
 import request from "@/utils/request";
 import SlidingPanel from '@/components/SlidingPanel.vue'; // 请确保路径正确
 
@@ -192,19 +215,29 @@ const route = useRoute();
 
 const panelVisible = ref(false);
 
-const taskDetail = ref(null);
+const taskDetail: any = ref(null);
 const noticeForm = ref({
   notice_number: "",
   related_offices: [],
 });
-const samplingItems = ref([]);
-const analysisItems = ref([]);
+const samplingItems:any = ref([]);
+const analysisItems:any = ref([]);
+
+const noticeFormRef = ref<FormInstance>();
+const rules = {
+  notice_number: [
+    { required: true, message: '请输入质控通知单号', trigger: 'blur' }
+  ],
+  related_offices: [
+    { type: 'array', required: true, message: '请选择至少一个有关科室', trigger: 'change' }
+  ]
+};
 
 const fetchTaskDetail = async () => {
   try {
     const taskId = route.params.taskId;
     const orderId = route.params.orderId;
-    const response = await request.get(`lipu/flow/task/get_single_task`, {
+    const response: any = await request.get(`lipu/flow/task/get_single_task`, {
       params: {
         task_id: taskId,
         order_id: orderId,
@@ -227,37 +260,25 @@ onMounted(() => {
 
 const addSamplingItem = () => {
   panelVisible.value = true;
-//   samplingItems.value.push({
-//     sample_category: "",
-//     test_params: "",
-//     quality_control: "",
-//     note: "",
-//   });
 };
 
-const editSamplingItem = (item) => {
+const editSamplingItem = (item: any) => {
   // 实现编辑逻辑
 };
 
-const deleteSamplingItem = (index) => {
+const deleteSamplingItem = (index: any) => {
   samplingItems.value.splice(index, 1);
 };
 
 const addAnalysisItem = () => {
-    panelVisible.value = true;
-//   analysisItems.value.push({
-//     sample_category: "",
-//     test_params: "",
-//     quality_control: "",
-//     note: "",
-//   });
+  panelVisible.value = true;
 };
 
-const editAnalysisItem = (item) => {
+const editAnalysisItem = (item: any) => {
   // 实现编辑逻辑
 };
 
-const deleteAnalysisItem = (index) => {
+const deleteAnalysisItem = (index: any) => {
   analysisItems.value.splice(index, 1);
 };
 
@@ -275,9 +296,96 @@ const goBack = () => {
   router.go(-1);
 };
 
-const downloadNotice = () => {
-  // 实现下发逻辑
-  ElMessage.success("下发成功");
+const downloadNotice = async () => {
+  if (!noticeFormRef.value) return;
+  
+  await noticeFormRef.value.validate(async (valid, fields) => {
+    if (valid) {
+      // 检查采样和分析表格是否有数据
+      if (samplingItems.value.length === 0 && analysisItems.value.length === 0) {
+        ElMessage.error("采样和分析表格至少需要填写一项");
+        return;
+      }
+
+      try {
+        const noticeData = {
+          order_id: route.params.orderId,
+          task_id: taskDetail.value.task_number || route.params.taskId,
+          qc_number: noticeForm.value.notice_number,
+          qc_related_office: noticeForm.value.related_offices.join(','),
+          qcsamplingmethod: samplingItems.value.map((item: any) => ({
+            sample_category: item.sample_category,
+            test_params: Array.isArray(item.test_params) ? item.test_params.join(',') : item.test_params,
+            sampling_qc_method_a: item.quality_control,
+            sampling_qc_method_b: item.quality_control, // 这里可能需要根据实际情况调整
+            sampling_qc_note: item.note
+          })),
+          qcanalysismethod: analysisItems.value.map((item: any) => ({
+            sample_category: item.sample_category,
+            analysis_params: Array.isArray(item.test_params) ? item.test_params.join(',') : item.test_params,
+            analysis_qc_method: item.quality_control,
+            analysis_qc_note: item.note
+          }))
+        };
+        console.log(noticeData);
+        const response: any = await request({
+          method: 'post',
+          url: 'lipu/flow/qc/qc_add',
+          data: noticeData,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log('Response:', response);
+        
+        if (response.code === 1) {
+          ElMessage.success("下发成功");
+          router.go(-1);
+        } else {
+          ElMessage.error(response.message || "下发失败");
+        }
+      } catch (error) {
+        console.error("Error downloading notice:", error);
+        ElMessage.error("下发失败");
+      }
+    } else {
+      console.log('Validation failed:', fields);
+      ElMessage.error("表单验证失败，请检查输入");
+    }
+  });
+};
+
+const dynamicOptions = ref<string[]>([]);
+const customOption = ref('');
+
+const handleQualityControlChange = (row: any) => {
+  if (row.quality_control === 'custom') {
+    row.customOption = ''; // 清空自定义输入
+  }
+};
+
+const addCustomOption = (row: any) => {
+  if (row.customOption && !dynamicOptions.value.includes(row.customOption)) {
+    dynamicOptions.value.push(row.customOption);
+    row.quality_control = row.customOption;
+    row.customOption = ''; // 清空输入框
+  }
+};
+
+const handlePanelConfirm = (selectedData: any) => {
+  console.log(selectedData); // 这里会打印出选中的数据数组
+  // 在这里处理选中的数据，添加到 samplingItems 和 analysisItems
+  selectedData.forEach((item: any) => {
+    const newItem = {
+      sample_category: item.sample_category,
+      test_params: item.test_params,
+      quality_control: "",
+      note: ""
+    };
+    samplingItems.value.push(newItem);
+    analysisItems.value.push({ ...newItem });
+  });
 };
 </script>
 

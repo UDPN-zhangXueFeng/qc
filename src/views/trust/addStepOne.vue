@@ -302,8 +302,9 @@ const cancel = () => {
   })
     .then(() => {
       // 用户确认后，返回上一页
-    //   router.go(-1);
-    router.push("/");
+      //   router.go(-1);
+      localStorage.removeItem("draft");
+      router.push("/");
     })
     .catch(() => {
       // 用户取消操作，不做任何处理
@@ -313,6 +314,7 @@ const cancel = () => {
 const saveAsDraft = () => {
   // 实现保存为草稿的逻辑
   console.log("保存为草稿");
+  localStorage.setItem("draft", JSON.stringify(form));
   ElMessage.success("已保存为草稿");
 };
 
@@ -370,7 +372,7 @@ const sendDataToServer = async (data) => {
         // 暂时保存
         localStorage.setItem("order_id", response.data.order_id);
         ElMessage.success("数据提交成功");
-        router.push("/");
+        router.push("/trust/addStepTwo");
       } else {
         ElMessage.error("数据提交失败");
       }

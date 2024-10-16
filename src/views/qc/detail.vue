@@ -74,12 +74,12 @@ import jsPDF from 'jspdf';
 const router = useRouter();
 const route = useRoute();
 
-const taskDetail = ref(null);
+const taskDetail:any = ref(null);
 
 const fetchTaskDetail = async () => {
   try {
     const id = route.params.id;
-    const response = await request.get(`lipu/flow/qc/get_single_qc`, {
+    const response:any = await request.get(`lipu/flow/qc/get_single_qc`, {
       params: { qc_id: id }
     });
     if (response.code === 1) {
@@ -97,16 +97,16 @@ onMounted(() => {
   fetchTaskDetail();
 });
 
-const getStatusType = (status) => {
-  const statusMap = {
+const getStatusType = (status: any) => {
+  const statusMap:any = {
     '1': 'warning',
     '2': 'success'
   }
   return statusMap[status] || 'info'
 }
 
-const getStatusText = (status) => {
-  const statusMap = {
+const getStatusText = (status: any) => {
+  const statusMap:any = {
     '1': '待确认',
     '2': '已确认'
   }
@@ -119,7 +119,7 @@ const printDetail = () => {
 
 const downloadDetail = async () => {
   try {
-    const element = document.querySelector('.task-detail');
+    const element:any = document.querySelector('.task-detail');
     const canvas = await html2canvas(element);
     const imgData = canvas.toDataURL('image/png');
     

@@ -20,6 +20,7 @@
             <el-option label="周检" value="周检"></el-option>
             <el-option label="月检" value="月检"></el-option>
             <el-option label="季检" value="季检"></el-option>
+            <el-option label="半年检" value="半年检"></el-option>
             <el-option label="年检" value="年检"></el-option>
           </el-select>
         </el-form-item>
@@ -116,7 +117,7 @@ const submitForm = async () => {
           }
         });
 
-        const response = await request({
+        const response: any = await request({
           url: '/lipu/flow/task/task_add',
           method: 'POST',
           data: formData,
