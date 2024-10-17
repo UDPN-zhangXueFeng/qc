@@ -319,8 +319,6 @@ const saveAsDraft = () => {
 };
 
 const submitForm = () => {
-  // router.push("/trust-add-two");
-  // return;
   formRef.value.validate((valid) => {
     if (valid) {
       console.log("表单验证通过");
