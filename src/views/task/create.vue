@@ -64,7 +64,7 @@
       </el-form>
     </el-card>
 
-    <!-- New table -->
+    <!-- Updated table -->
     <el-card class="mb-4">
       <template #header>
         <div class="card-header">
@@ -72,19 +72,19 @@
         </div>
       </template>
       <el-table :data="tableData" border style="width: 100%">
-        <el-table-column prop="index" label="序号" width="60"></el-table-column>
-        <el-table-column prop="sampleType" label="样品类别"></el-table-column>
-        <el-table-column prop="sampleName" label="点位名称"></el-table-column>
-        <el-table-column prop="sampleCode" label="点位编码"></el-table-column>
-        <el-table-column prop="testParam" label="检测参数"></el-table-column>
-        <el-table-column prop="testInterval" label="检测周期"></el-table-column>
-        <el-table-column prop="testFrequency" label="检测频次"></el-table-column>
-        <el-table-column prop="testDays" label="检测天数"></el-table-column>
-        <el-table-column prop="sampleDependency" label="采样依据"></el-table-column>
-        <el-table-column prop="testDependency" label="检测依据"></el-table-column>
-        <el-table-column prop="analysisDependency" label="分析依据"></el-table-column>
-        <el-table-column prop="limit" label="限值"></el-table-column>
-        <el-table-column prop="note" label="备注"></el-table-column>
+        <el-table-column type="index" label="序号" width="60"></el-table-column>
+        <el-table-column prop="sample_category" label="样品类别"></el-table-column>
+        <el-table-column prop="point_name" label="点位名称"></el-table-column>
+        <el-table-column prop="point_number" label="点位编码"></el-table-column>
+        <el-table-column prop="test_parms" label="检测参数"></el-table-column>
+        <el-table-column prop="test_period" label="检测周期"></el-table-column>
+        <el-table-column prop="test_frequency" label="检测频次"></el-table-column>
+        <el-table-column prop="test_days" label="检测天数"></el-table-column>
+        <el-table-column prop="sampling_basis_number" label="采样依据"></el-table-column>
+        <el-table-column prop="test_method_number" label="检测依据"></el-table-column>
+        <el-table-column prop="execute_method_number" label="分析依据"></el-table-column>
+        <el-table-column prop="limit_value" label="限值"></el-table-column>
+        <el-table-column prop="sampling_params_note" label="备注"></el-table-column>
       </el-table>
     </el-card>
 
@@ -98,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { useRouter,useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -196,38 +196,31 @@ const cancelForm = () => {
   router.go(-1);
 };
 
-const tableData = ref([
-  {
-    index: 1,
-    sampleType: '',
-    sampleName: '',
-    sampleCode: '',
-    testParam: 'PH',
-    testInterval: '',
-    testFrequency: '',
-    testDays: '',
-    sampleDependency: '',
-    testDependency: 'HJ835948',
-    analysisDependency: '',
-    limit: '',
-    note: ''
-  },
-  {
-    index: 2,
-    sampleType: '',
-    sampleName: '',
-    sampleCode: '',
-    testParam: '电导率',
-    testInterval: '',
-    testFrequency: '',
-    testDays: '',
-    sampleDependency: '',
-    testDependency: '',
-    analysisDependency: '',
-    limit: '',
-    note: ''
+const tableData = ref([]);
+
+const fetchTaskTestParams = async (wtId: string, testPeriod: string) => {
+  try {
+    const response: any = await request({
+      url: `/lipu/flow/task/get_task_test_params?wt_id=${wtId}&test_period=${testPeriod}`,
+      method: 'GET',
+    });
+
+    if (response.code === 1 && response.data && response.data.list) {
+      tableData.value = response.data.list;
+    } else {
+      ElMessage.error(response.msg || '获取检测参数失败');
+    }
+  } catch (error) {
+    console.error('获取检测参数失败:', error);
+    ElMessage.error('获取检测参数失败，请稍后重试');
   }
-]);
+};
+
+watch(() => [form.order_id, form.test_period], ([newOrderId, newTestPeriod]) => {
+  if (newOrderId && newTestPeriod) {
+    fetchTaskTestParams(newOrderId, newTestPeriod);
+  }
+});
 </script>
 
 <style scoped>

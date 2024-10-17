@@ -21,14 +21,25 @@
       </div>
 
       <el-table :data="tableData" border style="width: 100%">
-        <el-table-column type="index" label="序号" width="50" fixed></el-table-column>
-        <el-table-column label="操作" width="120" fixed>
+        <el-table-column type="index" label="序号" width="60" fixed></el-table-column>
+        <el-table-column label="操作" width="140" fixed>
           <template #default="{ row, $index }">
             <el-button type="primary" size="small" @click="editRow(row)" text>编辑</el-button>
             <el-button type="danger" size="small" @click="deleteRow($index)" text>删除</el-button>
           </template>
         </el-table-column>
-        <el-table-column v-for="col in tableColumns" :key="col.prop" v-bind="col"></el-table-column>
+        <el-table-column prop="sample_category" label="样品类别" width="100"></el-table-column>
+        <el-table-column prop="point_name" label="点位名称" width="100"></el-table-column>
+        <el-table-column prop="point_number" label="点位编码" width="100"></el-table-column>
+        <el-table-column prop="test_parms" label="检测参数" width="100"></el-table-column>
+        <el-table-column prop="test_frequency" label="检测频次" width="100"></el-table-column>
+        <el-table-column prop="test_period" label="检测周期" width="100"></el-table-column>
+        <el-table-column prop="test_days" label="检测天数" width="100"></el-table-column>
+        <el-table-column prop="sampling_basis_number" label="采样依据" width="120"></el-table-column>
+        <el-table-column prop="test_method_number" label="检测依据" width="120"></el-table-column>
+        <el-table-column prop="execute_method_number" label="执行依据" width="120"></el-table-column>
+        <el-table-column prop="limit_value" label="限值" width="100"></el-table-column>
+        <el-table-column prop="sampling_params_note" label="备注"></el-table-column>
       </el-table>
     </el-card>
 
@@ -44,60 +55,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive,onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useRouter } from "vue-router";
 import request from "@/utils/request";
 
 interface TableRow {
-  sampleType: string;
-  pointName: string;
-  pointCode: string;
-  testItem: string;
-  testCount: string;
-  testPeriod: string;
-  testDays: string;
-  sampleMethod: string;
-  testMethod: string;
-  executiveStandard: string;
-  limitValue: string;
-  remark: string;
+  id: number;
+  sample_category: string;
+  point_name: string;
+  point_number: string;
+  test_parms: string;
+  test_frequency: string;
+  test_period: string;
+  test_days: string;
+  sampling_basis_number: string;
+  test_method_number: string;
+  execute_method_number: string;
+  limit_value: string;
+  sampling_params_note: string;
 }
 
 const router = useRouter();
 const tableData = ref<TableRow[]>([]);
 
-const tableColumns = [
-  { prop: "sampleType", label: "样品类别" },
-  { prop: "pointName", label: "点位名称" },
-  { prop: "pointCode", label: "点位编码" },
-  { prop: "testItem", label: "检测参数" },
-  { prop: "testCount", label: "检测参数" },
-  { prop: "testPeriod", label: "检测周期" },
-  { prop: "testDays", label: "检测天数" },
-  { prop: "sampleMethod", label: "采样依据" },
-  { prop: "testMethod", label: "检测依据" },
-  { prop: "executiveStandard", label: "执行依据" },
-  { prop: "limitValue", label: "限值" },
-  { prop: "remark", label: "备注" },
-];
-
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const addRow = () => {
   tableData.value.push(reactive<TableRow>({
-    sampleType: "",
-    pointName: "",
-    pointCode: "",
-    testItem: "",
-    testCount: "",
-    testPeriod: "",
-    testDays: "",
-    sampleMethod: "",
-    testMethod: "",
-    executiveStandard: "",
-    limitValue: "",
-    remark: "",
+    id: 0,
+    sample_category: "",
+    point_name: "",
+    point_number: "",
+    test_parms: "",
+    test_frequency: "",
+    test_period: "",
+    test_days: "",
+    sampling_basis_number: "",
+    test_method_number: "",
+    execute_method_number: "",
+    limit_value: "",
+    sampling_params_note: "",
   }));
 };
 
@@ -185,7 +183,7 @@ const handleFileUpload = async (event: Event) => {
 
   try {
     // 第一步：上传文件
-    const uploadResponse:any = await request({
+    const uploadResponse: any = await request({
       method: 'POST',
       url: '/lipu/flow/order/testparams_upload',
       data: formData,
@@ -194,17 +192,15 @@ const handleFileUpload = async (event: Event) => {
       }
     });
 
-    if (uploadResponse.code === 1 ) {
-      // 文件上传成功，获取 file_path
-
+    if (uploadResponse.code === 1) {
       const filePath = uploadResponse.file_path;
       
       // 第二步：调用导入接口
       const importFormData = new FormData();
       importFormData.append('order_id', localStorage.getItem('order_id') || '');
       importFormData.append('file_path', filePath);
-      console.log(importFormData)
-      const importResponse:any = await request({
+
+      const importResponse: any = await request({
         method: 'POST',
         url: '/lipu/flow/order/testparams_import',
         data: importFormData,
@@ -212,15 +208,13 @@ const handleFileUpload = async (event: Event) => {
 
       if (importResponse.code === 1) {
         ElMessage.success("文件导入成功");
-        // 更新表格数据
-        if (Array.isArray(importResponse.data)) {
-          tableData.value = importResponse.data;
-        }
+        // 导入成功后，调用接口获取最新的表格数据
+        await fetchTableData();
       } else {
-        ElMessage.error(importResponse.message || "导入失败");
+        ElMessage.error(importResponse.msg || "导入失败");
       }
     } else {
-      ElMessage.error(uploadResponse.message || "上传失败");
+      ElMessage.error(uploadResponse.msg || "上传失败");
     }
   } catch (error) {
     console.error("Error during file upload and import:", error);
@@ -232,6 +226,28 @@ const handleFileUpload = async (event: Event) => {
     fileInput.value.value = '';
   }
 };
+
+const fetchTableData = async () => {
+  try {
+    const response: any = await request({
+      method: 'GET',
+      url: `/lipu/flow/order/import_test_params?order_id=${localStorage.getItem('order_id') || ''}`,
+    });
+
+    if (response.code === 1 && response.data && Array.isArray(response.data.list)) {
+      tableData.value = response.data.list;
+    } else {
+      ElMessage.error(response.msg || "获取数据失败");
+    }
+  } catch (error) {
+    console.error("Error fetching table data:", error);
+    ElMessage.error("获取表格数据失败");
+  }
+};
+
+onMounted(() => {
+  fetchTableData();
+});
 </script>
 
 <style scoped>
