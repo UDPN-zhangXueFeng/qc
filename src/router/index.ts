@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import Login from "@/views/login.vue";
 
 import TrustList from "@/views/trust/list.vue";
 import TrustAddOne from "@/views/trust/addStepOne.vue";
@@ -19,6 +20,11 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
+      component: Login,
+    },
+    {
+      path: "/trust-list",
+      name: "TrustList",
       component: TrustList,
     },
     {

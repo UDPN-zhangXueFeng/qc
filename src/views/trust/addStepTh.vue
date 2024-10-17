@@ -30,7 +30,7 @@
   
   const backToList = () => {
     // 实现返回委托单列表的逻辑
-    router.push('/') // 假设列表页面的路由是 '/trust-list'
+    router.push('/trust-list') // 假设列表页面的路由是 '/trust-list'
   }
   
   const viewDetails = () => {

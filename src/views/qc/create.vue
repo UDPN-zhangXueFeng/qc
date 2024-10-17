@@ -190,7 +190,13 @@
     </div>
     <SlidingPanel 
       v-model="panelVisible"
+      :taskId="route.params.taskId as string"
       @confirm="handlePanelConfirm"
+    />
+    <SlidingPanel 
+      v-model="panelVisible1"
+      :taskId="route.params.taskId as string"
+      @confirm="handlePanelConfirm1"
     />
     <div class="fixed-bottom">
       <div class="button-container">
@@ -214,6 +220,7 @@ const router = useRouter();
 const route = useRoute();
 
 const panelVisible = ref(false);
+const panelVisible1 = ref(false);
 
 const taskDetail: any = ref(null);
 const noticeForm = ref({
@@ -271,7 +278,7 @@ const deleteSamplingItem = (index: any) => {
 };
 
 const addAnalysisItem = () => {
-  panelVisible.value = true;
+  panelVisible1.value = true;
 };
 
 const editAnalysisItem = (item: any) => {
@@ -308,32 +315,39 @@ const downloadNotice = async () => {
       }
 
       try {
-        const noticeData = {
-          order_id: route.params.orderId,
-          task_id: taskDetail.value.task_number || route.params.taskId,
-          qc_number: noticeForm.value.notice_number,
-          qc_related_office: noticeForm.value.related_offices.join(','),
-          qcsamplingmethod: samplingItems.value.map((item: any) => ({
-            sample_category: item.sample_category,
-            test_params: Array.isArray(item.test_params) ? item.test_params.join(',') : item.test_params,
-            sampling_qc_method_a: item.quality_control,
-            sampling_qc_method_b: item.quality_control, // 这里可能需要根据实际情况调整
-            sampling_qc_note: item.note
-          })),
-          qcanalysismethod: analysisItems.value.map((item: any) => ({
-            sample_category: item.sample_category,
-            analysis_params: Array.isArray(item.test_params) ? item.test_params.join(',') : item.test_params,
-            analysis_qc_method: item.quality_control,
-            analysis_qc_note: item.note
-          }))
-        };
-        console.log(noticeData);
+        const formData = new FormData();
+        formData.append('order_id', route.params.orderId as string);
+        formData.append('task_id', taskDetail.value.task_number || route.params.taskId as string);
+        formData.append('qc_number', noticeForm.value.notice_number);
+        formData.append('qc_related_office', noticeForm.value.related_offices.join(','));
+        
+        const qcsamplingmethod = samplingItems.value.map((item: any) => ({
+          sample_category_id:item.sample_category_id,
+          sample_category: item.sample_category,
+          test_params: Array.isArray(item.test_params) ? item.test_params.join(',') : item.test_params,
+          sampling_qc_method_a: item.quality_control,
+          sampling_qc_method_b: item.quality_control, // 这里可能需要根据实际情况调整
+          sampling_qc_note: item.note
+        }));
+        formData.append('qcsamplingmethod', JSON.stringify(qcsamplingmethod));
+
+        const qcanalysismethod = analysisItems.value.map((item: any) => ({
+          sample_category_id:item.sample_category_id,
+          sample_category: item.sample_category,
+          analysis_params: Array.isArray(item.test_params) ? item.test_params.join(',') : item.test_params,
+          analysis_qc_method: item.quality_control,
+          analysis_qc_note: item.note
+        }));
+        formData.append('qcanalysismethod', JSON.stringify(qcanalysismethod));
+
+        console.log('FormData:', Object.fromEntries(formData));
+
         const response: any = await request({
           method: 'post',
           url: 'lipu/flow/qc/qc_add',
-          data: noticeData,
+          data: formData,
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'multipart/form-data'
           }
         });
 
@@ -343,7 +357,7 @@ const downloadNotice = async () => {
           ElMessage.success("下发成功");
           router.go(-1);
         } else {
-          ElMessage.error(response.message || "下发失败");
+          ElMessage.error(response.msg || "下发失败");
         }
       } catch (error) {
         console.error("Error downloading notice:", error);
@@ -373,17 +387,29 @@ const addCustomOption = (row: any) => {
   }
 };
 
-const handlePanelConfirm = (selectedData: any) => {
-  console.log(selectedData); // 这里会打印出选中的数据数组
+const handlePanelConfirm = (data: any) => {
   // 在这里处理选中的数据，添加到 samplingItems 和 analysisItems
-  selectedData.forEach((item: any) => {
+  data.selectedItems.forEach((item: any) => {
     const newItem = {
+      sample_category_id:data.selectedCategoryId,
       sample_category: item.sample_category,
       test_params: item.test_params,
       quality_control: "",
       note: ""
     };
     samplingItems.value.push(newItem);
+  });
+};
+const handlePanelConfirm1 = (data: any) => {
+  // 在这里处理选中的数据，添加到 samplingItems 和 analysisItems
+  data.selectedItems.forEach((item: any) => {
+    const newItem = {
+      sample_category_id:data.selectedCategoryId,
+      sample_category: item.sample_category,
+      test_params: item.test_params,
+      quality_control: "",
+      note: ""
+    };
     analysisItems.value.push({ ...newItem });
   });
 };
