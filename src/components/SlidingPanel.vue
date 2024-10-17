@@ -8,10 +8,14 @@
   >
     <div class="sliding-panel-content">
       <el-form :inline="true" :model="form" class="demo-form-inline">
-        <el-form-item label="样品类别">
+        <el-form-item label="样品类别" class="w-[250px]">
           <el-select v-model="form.category" placeholder="请选择样品类别">
-            <el-option label="水和废水" value="水和废水"></el-option>
-            <!-- 添加更多选项 -->
+            <el-option
+              v-for="item in categoryOptions"
+              :key="item.id"
+              :label="item.sample_category"
+              :value="item.sample_category"
+            ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -26,20 +30,20 @@
         <el-table-column prop="category" label="类别"></el-table-column>
         <el-table-column label="检测参数">
           <template #default="scope">
-            <el-checkbox-group v-model="scope.row.parameters">
-              <el-checkbox v-for="param in parameters" :key="param" :label="param"></el-checkbox>
+            <el-checkbox-group v-model="scope.row.selectedParameters">
+              <el-checkbox v-for="param in scope.row.parameters" :key="param" :label="param"></el-checkbox>
             </el-checkbox-group>
           </template>
         </el-table-column>
       </el-table>
       
-      <el-pagination
+      <!-- <el-pagination
         :current-page="currentPage"
         :page-size="pageSize"
         :total="total"
         layout="prev, pager, next, jumper"
         @current-change="handlePageChange"
-      ></el-pagination>
+      ></el-pagination> -->
     </div>
     <template #footer>
       <div class="sliding-panel-footer">
@@ -51,7 +55,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, onMounted } from 'vue';
+import request from '@/utils/request'; // 确保导入了request工具
 
 const props = defineProps({
   modelValue: Boolean,
@@ -66,6 +71,10 @@ const props = defineProps({
   direction: {
     type: String,
     default: 'rtl'
+  },
+  taskId: {
+    type: String,
+    required: true
   }
 });
 
@@ -76,16 +85,70 @@ const form = reactive({
   category: '',
 });
 
-const tableData = ref([
-  { id: 1, category: '水和废水', parameters: ['PH', '电导率'] },
-  { id: 2, category: '水和废水', parameters: ['水温', '流量'] },
-]);
+const tableData:any = ref([]);
 
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(100);
 const parameters = ['PH', '电导率', '水温', '流量'];
 const selectedRows = ref([]);
+
+const categoryOptions = ref([]);
+
+const fetchCategoryOptions = async () => {
+  try {
+    const response: any = await request({
+      method: 'GET',
+      url: '/lipu/flow/order/sample_category_list',
+    });
+
+    if (response.code === 1 && Array.isArray(response.data)) {
+      categoryOptions.value = response.data;
+      // 设置默认选中第一个选项
+      if (categoryOptions.value.length > 0) {
+        form.category = categoryOptions.value[0].sample_category;
+      }
+    } else {
+      console.error('Failed to fetch category options:', response.msg);
+    }
+  } catch (error) {
+    console.error('Error fetching category options:', error);
+  }
+};
+
+const fetchTaskData = async () => {
+  try {
+    const formData = new FormData();
+    formData.append('task_id', props.taskId);
+
+    const response: any = await request({
+      method: 'post',
+      url: '/lipu/flow/qc/get_task_all_category_testparams',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    if (response.code === 1 && response.data && response.data.all_testparms) {
+      tableData.value = Object.entries(response.data.all_testparms).map(([category, parameters], index) => ({
+        id: index + 1,
+        category,
+        parameters,
+        selectedParameters: []
+      }));
+    } else {
+      console.error('Failed to fetch task data:', response.msg);
+    }
+  } catch (error) {
+    console.error('Error fetching task data:', error);
+  }
+};
+
+onMounted(() => {
+  fetchCategoryOptions();
+  fetchTaskData();
+});
 
 watch(() => props.modelValue, (newVal) => {
   visible.value = newVal;
@@ -131,10 +194,22 @@ const handleSelectionChange = (selection: any[]) => {
 };
 
 const getSelectedItems = () => {
-  return selectedRows.value.map(item => ({
-    sample_category: item.category,
-    test_params: item.parameters
-  }));
+  const selectedItems = tableData.value
+    .filter(item => item.selectedParameters.length > 0)
+    .map(item => ({
+      sample_category: item.category,
+      test_params: item.selectedParameters
+    }));
+
+  // 找到当前选中的样品类别的 ID
+  const selectedCategoryId = categoryOptions.value.find(
+    option => option.sample_category === form.category
+  )?.id;
+
+  return {
+    selectedItems,
+    selectedCategoryId
+  };
 };
 </script>
 
