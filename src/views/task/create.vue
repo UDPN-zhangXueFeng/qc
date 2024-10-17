@@ -10,8 +10,12 @@
       <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
         <el-form-item label="关联委托单" prop="order_id" required>
           <el-select v-model="form.order_id" placeholder="请选择委托单">
-            <el-option label="委托单1" value="1"></el-option>
-            <el-option label="委托单2" value="2"></el-option>
+            <el-option
+              v-for="item in orderOptions"
+              :key="item.id"
+              :label="`${item.order_number || '无编号'} - ${item.project_name}`"
+              :value="item.id.toString()"
+            ></el-option>
           </el-select>
         </el-form-item>
 
@@ -20,6 +24,7 @@
             <el-option label="周检" value="周检"></el-option>
             <el-option label="月检" value="月检"></el-option>
             <el-option label="季检" value="季检"></el-option>
+            <el-option label="半年检" value="半年检"></el-option>
             <el-option label="年检" value="年检"></el-option>
           </el-select>
         </el-form-item>
@@ -59,7 +64,29 @@
       </el-form>
     </el-card>
 
-    <!-- 移除检测参数表格，因为现在使用多选框选择 -->
+    <!-- New table -->
+    <el-card class="mb-4">
+      <template #header>
+        <div class="card-header">
+          <span>检测参数</span>
+        </div>
+      </template>
+      <el-table :data="tableData" border style="width: 100%">
+        <el-table-column prop="index" label="序号" width="60"></el-table-column>
+        <el-table-column prop="sampleType" label="样品类别"></el-table-column>
+        <el-table-column prop="sampleName" label="点位名称"></el-table-column>
+        <el-table-column prop="sampleCode" label="点位编码"></el-table-column>
+        <el-table-column prop="testParam" label="检测参数"></el-table-column>
+        <el-table-column prop="testInterval" label="检测周期"></el-table-column>
+        <el-table-column prop="testFrequency" label="检测频次"></el-table-column>
+        <el-table-column prop="testDays" label="检测天数"></el-table-column>
+        <el-table-column prop="sampleDependency" label="采样依据"></el-table-column>
+        <el-table-column prop="testDependency" label="检测依据"></el-table-column>
+        <el-table-column prop="analysisDependency" label="分析依据"></el-table-column>
+        <el-table-column prop="limit" label="限值"></el-table-column>
+        <el-table-column prop="note" label="备注"></el-table-column>
+      </el-table>
+    </el-card>
 
     <div class="fixed-bottom">
       <div class="button-container">
@@ -71,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { useRouter,useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -102,6 +129,30 @@ const rules: FormRules = {
   task_address: [{ required: true, message: "请输入采样地点", trigger: "blur" }],
 };
 
+const orderOptions = ref([]);
+
+const fetchOrderOptions = async () => {
+  try {
+    const response: any = await request({
+      url: '/lipu/flow/task/comfir_qc',
+      method: 'GET',
+    });
+
+    if (response.code === 1 && response.data && response.data.list) {
+      orderOptions.value = response.data.list;
+    } else {
+      ElMessage.error(response.msg || '获取委托单列表失败');
+    }
+  } catch (error) {
+    console.error('获取委托单列表失败:', error);
+    ElMessage.error('获取委托单列表失败，请稍后重试');
+  }
+};
+
+onMounted(() => {
+  fetchOrderOptions();
+});
+
 const submitForm = async () => {
   if (!formRef.value) return;
 
@@ -117,7 +168,7 @@ const submitForm = async () => {
           }
         });
 
-        const response = await request({
+        const response: any = await request({
           url: '/lipu/flow/task/task_add',
           method: 'POST',
           data: formData,
@@ -144,6 +195,39 @@ const submitForm = async () => {
 const cancelForm = () => {
   router.go(-1);
 };
+
+const tableData = ref([
+  {
+    index: 1,
+    sampleType: '',
+    sampleName: '',
+    sampleCode: '',
+    testParam: 'PH',
+    testInterval: '',
+    testFrequency: '',
+    testDays: '',
+    sampleDependency: '',
+    testDependency: 'HJ835948',
+    analysisDependency: '',
+    limit: '',
+    note: ''
+  },
+  {
+    index: 2,
+    sampleType: '',
+    sampleName: '',
+    sampleCode: '',
+    testParam: '电导率',
+    testInterval: '',
+    testFrequency: '',
+    testDays: '',
+    sampleDependency: '',
+    testDependency: '',
+    analysisDependency: '',
+    limit: '',
+    note: ''
+  }
+]);
 </script>
 
 <style scoped>

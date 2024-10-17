@@ -19,9 +19,9 @@
   </CommonList>
   <ReviewDialog
     ref="reviewDialogRef"
-    :order-id="currentOrderId"
-    @close="handleReviewClose"
-    @success="handleReviewSuccess"
+    :order-id="currentOrderId || ''"
+    @close="() => {}"
+    @success="() => {}"
   />
 </template>
 
@@ -36,7 +36,7 @@ import ReviewDialog from "@/components/ReviewDialog.vue";
 
 const router = useRouter();
 
-const searchFields = [
+const searchFields: any[] = [
   {
     prop: "order_number",
     label: "委托单号",
@@ -44,8 +44,8 @@ const searchFields = [
     props: { placeholder: "委托单号" },
   },
   {
-    // prop: "project_name",
-    prop: "search",
+    prop: "project_name",
+    // prop: "search",
     label: "项目名称",
     component: "el-input",
     props: { placeholder: "项目名称" },
@@ -60,22 +60,42 @@ const searchFields = [
     prop: "sampling_or_delivery",
     label: "采样/送样",
     component: "el-select",
-    props: { placeholder: "采样/送样" },
+    props: { 
+      placeholder: "请选择采样/送样",
+      options: [
+        { value: "送样", label: "送样" },
+        { value: "采样", label: "采样" }
+      ]
+    },
   },
   {
     prop: "is_subcontract",
     label: "是否分包",
     component: "el-select",
-    props: { placeholder: "是否分包" },
+    props: { 
+      placeholder: "请选择是否分包",
+      options: [
+        { value: "是", label: "是" },
+        { value: "否", label: "否" }
+      ]
+    },
   },
   {
     prop: "status",
     label: "状态",
     component: "el-select",
-    props: { placeholder: "状态" },
+    props: { 
+      placeholder: "请选择状态",
+      options: [
+        { value: "1", label: "待审批" },
+        { value: "2", label: "已通过" },
+        { value: "3", label: "已驳回" },
+        { value: "4", label: "已撤回" },
+      ]
+    },
   },
   {
-    prop: "createtime",
+    prop: ["start_time", "end_time"],
     label: "创建时间",
     component: "el-date-picker",
     props: {
@@ -83,12 +103,15 @@ const searchFields = [
       rangeSeparator: "至",
       startPlaceholder: "开始时间",
       endPlaceholder: "结束时间",
+      valueFormat: "YYYY-MM-DD",
     },
   },
 ];
 
 const tableColumns = [
-  { prop: "order_number", label: "委托单号", width: "180" },
+  { prop: "order_number", label: "委托单号", width: "180",formatter: (row:any) => {
+    return row.order_number===null?"--":("LPWT"+row.order_number)
+  } },
   { prop: "project_name", label: "项目名称", width: "180" },
   { prop: "sampling_or_delivery_text", label: "采样/送样", width: "120" },
   { prop: "is_subcontract_text", label: "是否分包", width: "100" },
@@ -103,18 +126,18 @@ const searchForm = reactive({});
 const tableData = ref([]);
 const total = ref(0);
 
-const fetchData = async (params) => {
+const fetchData = async (params:any) => {
   try {
     const response = await request({
       url: "lipu/flow/order/order_list",
       method: "GET",
       params: params,
     });
-    tableData.value = response.data.data;
-    total.value = response.data.total;
+    tableData.value = response.data.list;
+    total.value = response.data.count;
     return {
-      data: response.data.data,
-      total: response.data.total,
+      data: response.data.list,
+      total: response.data.count,
     };
   } catch (error) {
     console.error("获取委托单列表失败:", error);
@@ -122,7 +145,7 @@ const fetchData = async (params) => {
   }
 };
 
-const onSearch = (formData) => {
+const onSearch = (formData:any) => {
   console.log("Search:", formData);
 };
 
@@ -130,7 +153,7 @@ const onReset = () => {
   console.log("Reset search form");
 };
 
-const onPageChange = (page) => {
+const onPageChange = (page:any) => {
   console.log("Page changed:", page);
 };
 
@@ -147,8 +170,8 @@ const handleExport = async () => {
     }
 
     // 使用当前搜索条件和表格数据进行导出
-    const excelData = tableData.value.map((item) => ({
-      委托单号: item.order_number,
+    const excelData = tableData.value.map((item:any) => ({
+      委托单号:"LPWT"+ item.order_number,
       项目名称: item.project_name,
       "采样/送样": item.sampling_or_delivery_text,
       是否分包: item.is_subcontract_text,
@@ -183,43 +206,43 @@ const handlePrint = () => {
 const reviewDialogRef = ref<InstanceType<typeof ReviewDialog> | null>(null);
 const currentOrderId = ref<number | string | null>(null);
 
-const handleApprove = (row) => {
+const handleApprove = (row:any) => {
   console.log("Approve:", row);
   currentOrderId.value = row.id;
   reviewDialogRef.value?.open();
 };
 
-const handleView = (row) => {
+const handleView = (row:any) => {
   router.push(`/trust-detail/${row.id}`);
 };
 
-const handleCopy = (row) => {
+const handleCopy = (row:any) => {
   console.log("Copy:", row);
 };
 
-const handleEdit = (row) => {
+const handleEdit = (row:any) => {
   console.log("Edit:", row);
 };
-const handleTask = (row) => {
+const handleTask = (row:any) => {
   console.log("Task:", row);
   router.push(`/task-create/${row.id}`);
 };
 
-const handleTaskList = (row) => {
-  router.push(`/task-list/${row.id}`);
+const handleTaskList = (row:any) => {
+  router.push(`/task-list`);
 };
 
-const handleDelete = (row) => {
+const handleDelete = (row:any) => {
   console.log("Delete:", row);
 };
 
-const getStatusType = (status) => {
+const getStatusType = (status:any) => {
   switch (status) {
-    case "通过":
+    case "2":
       return "success";
-    case "驳回":
+    case "3":
       return "danger";
-    case "待审批":
+    case "1":
       return "warning";
     default:
       return "info";
@@ -230,7 +253,7 @@ const getStatusType = (status) => {
 const headerActions = reactive([
   { name: "add", label: "新增", type: "primary", handler: handleAdd },
   { name: "export", label: "导出", type: "", handler: handleExport },
-  { name: "print", label: "打印", type: "", handler: handlePrint },
+  // { name: "print", label: "打印", type: "", handler: handlePrint },
 ]);
 
 const rowActions = reactive([
@@ -243,3 +266,4 @@ const rowActions = reactive([
   { name: "delete", label: "删除", handler: handleDelete },
 ]);
 </script>
+

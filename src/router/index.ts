@@ -47,7 +47,7 @@ const router = createRouter({
       component: TaskCreate,
     },
     {
-      path: "/task-list/:id",
+      path: "/task-list",
       name: "TaskList",
       component: TaskList,
     },
@@ -57,7 +57,7 @@ const router = createRouter({
       component: TaskDetail,
     },
     {
-      path: "/qc-list/:taskId/:orderId",
+      path: "/qc-list",
       name: "QcList",
       component: QcList,
     },
