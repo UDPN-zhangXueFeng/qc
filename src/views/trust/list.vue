@@ -110,7 +110,7 @@ const searchFields: any[] = [
 
 const tableColumns = [
   { prop: "order_number", label: "委托单号", width: "180",formatter: (row:any) => {
-    return row.order_number===null?"--":("LPWT"+row.order_number)
+    return row.order_number===null?"--":row.order_number
   } },
   { prop: "project_name", label: "项目名称", width: "180" },
   { prop: "sampling_or_delivery_text", label: "采样/送样", width: "120" },
@@ -171,7 +171,7 @@ const handleExport = async () => {
 
     // 使用当前搜索条件和表格数据进行导出
     const excelData = tableData.value.map((item:any) => ({
-      委托单号:"LPWT"+ item.order_number,
+      委托单号:item.order_number,
       项目名称: item.project_name,
       "采样/送样": item.sampling_or_delivery_text,
       是否分包: item.is_subcontract_text,
