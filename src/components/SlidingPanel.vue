@@ -30,9 +30,24 @@
         <el-table-column prop="category" label="类别"></el-table-column>
         <el-table-column label="检测参数">
           <template #default="scope">
-            <el-checkbox-group v-model="scope.row.selectedParameters">
-              <el-checkbox v-for="param in scope.row.parameters" :key="param" :label="param"></el-checkbox>
-            </el-checkbox-group>
+            <div>
+              <el-checkbox
+                v-model="scope.row.allSelected"
+                @change="handleSelectAll(scope.row)"
+              >
+                全选
+              </el-checkbox>
+              <el-checkbox-group 
+                v-model="scope.row.selectedParameters"
+                @change="handleParameterChange(scope.row)"
+              >
+                <el-checkbox 
+                  v-for="param in scope.row.parameters" 
+                  :key="param" 
+                  :label="param"
+                ></el-checkbox>
+              </el-checkbox-group>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -210,6 +225,18 @@ const getSelectedItems = () => {
     selectedItems,
     selectedCategoryId
   };
+};
+
+const handleSelectAll = (row: any) => {
+  if (row.allSelected) {
+    row.selectedParameters = [...row.parameters];
+  } else {
+    row.selectedParameters = [];
+  }
+};
+
+const handleParameterChange = (row: any) => {
+  row.allSelected = row.selectedParameters.length === row.parameters.length;
 };
 </script>
 

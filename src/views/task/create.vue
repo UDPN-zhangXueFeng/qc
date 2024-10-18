@@ -29,13 +29,13 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="检测参数" prop="orderparams_ids" required>
+        <!-- <el-form-item label="检测参数" prop="orderparams_ids" required>
           <el-select v-model="form.orderparams_ids" multiple placeholder="请选择检测参数">
             <el-option label="参数1" value="1"></el-option>
             <el-option label="参数2" value="2"></el-option>
             <el-option label="参数3" value="3"></el-option>
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
 
         <el-form-item label="任务名称" prop="task_name" required>
           <el-input v-model="form.task_name" placeholder="请输入任务名称"></el-input>
@@ -122,7 +122,7 @@ const form = reactive({
 const rules: FormRules = {
   order_id: [{ required: true, message: "请选择关联委托单", trigger: "change" }],
   test_period: [{ required: true, message: "请选择检测周期", trigger: "change" }],
-  orderparams_ids: [{ type: "array", required: true, message: "请选择检测参数", trigger: "change" }],
+  // orderparams_ids: [{ type: "array", required: true, message: "请选择检测参数", trigger: "change" }],
   task_name: [{ required: true, message: "请输入任务名称", trigger: "blur" }],
   task_number: [{ required: true, message: "请输入任务编号", trigger: "blur" }],
   task_related_office: [{ type: "array", required: true, message: "请至少选择一个相关科室", trigger: "change" }],
@@ -156,18 +156,23 @@ onMounted(() => {
 const submitForm = async () => {
   if (!formRef.value) return;
 
+  const formData = new FormData();
+
+  Object.keys(form).forEach(key => {
+    if (key === 'orderparams_ids') {
+      // 特殊处理 orderparams_ids
+      const allIds = tableData.value.map(row => row.id).join(',');
+      formData.append(key, allIds);
+    } else if (Array.isArray(form[key])) {
+      formData.append(key, form[key].join(','));
+    } else {
+      formData.append(key, form[key]);
+    }
+  });
+
   await formRef.value.validate(async (valid, fields) => {
     if (valid) {
       try {
-        const formData = new FormData();
-        Object.keys(form).forEach(key => {
-          if (Array.isArray(form[key])) {
-            formData.append(key, form[key].join(','));
-          } else {
-            formData.append(key, form[key]);
-          }
-        });
-
         const response: any = await request({
           url: '/lipu/flow/task/task_add',
           method: 'POST',
@@ -177,8 +182,9 @@ const submitForm = async () => {
 
         if (response.code === 1) {
           ElMessage.success('任务下发成功');
-          // router.push('/'); // 提交成功后跳转到首页
-          router.push(`/qc-create/${response.data.task_id}/${route.params.id}`);
+          router.push(`/task-detail/${response.data.task_id}`); // 提交成功后跳转到首页
+          // router.push(`/qc-create/${response.data.task_id}/${route.params.id}`);
+
         } else {
           ElMessage.error(response.msg || '任务下发失败');
         }

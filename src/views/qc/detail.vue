@@ -5,7 +5,7 @@
         <div class="card-header">
           <span>质控单详情</span>
           <div>
-            <el-button @click="printDetail">打印</el-button>
+            <!-- <el-button @click="printDetail">打印</el-button> -->
             <el-button @click="downloadDetail">下载</el-button>
           </div>
         </div>
@@ -39,7 +39,8 @@
         <el-table-column prop="test_params" label="检测参数"></el-table-column>
         <el-table-column label="质控措施">
           <template #default="scope">
-            {{ scope.row.sampling_qc_method_a }} {{ scope.row.sampling_qc_method_b }}
+            {{ scope.row.sampling_qc_method_a }} 
+            <!-- {{ scope.row.sampling_qc_method_b }} -->
           </template>
         </el-table-column>
         <el-table-column prop="sampling_qc_note" label="备注"></el-table-column>
@@ -55,7 +56,7 @@
       <el-table :data="taskDetail.qcanalysismethod_info" border style="width: 100%">
         <el-table-column type="index" label="序号" width="50"></el-table-column>
         <el-table-column prop="sample_category" label="样品类别"></el-table-column>
-        <el-table-column prop="analysis_parmas" label="检测参数"></el-table-column>
+        <el-table-column prop="analysis_params" label="检测参数"></el-table-column>
         <el-table-column prop="analysis_qc_method" label="质控措施"></el-table-column>
         <el-table-column prop="analysis_qc_note" label="备注"></el-table-column>
       </el-table>
