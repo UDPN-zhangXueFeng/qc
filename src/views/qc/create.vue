@@ -92,30 +92,56 @@
           ></el-table-column>
           <el-table-column prop="quality_control" label="质控措施">
             <template #default="scope">
-              <el-select
-                v-model="scope.row.quality_control"
-                placeholder="请选择"
-                @change="handleQualityControlChange(scope.row)"
-              >
-                <el-option
-                  label="现场平行样/批"
-                  value="现场平行样/批"
-                ></el-option>
-                <el-option
-                  label="全程序空白样/批"
-                  value="全程序空白样/批"
-                ></el-option>
-                <el-option label="密码样/批" value="密码样/批"></el-option>
-                <el-option label="自定义" value="custom"></el-option>
-                <el-option
-                  v-for="option in dynamicOptions"
-                  :key="option"
-                  :label="option"
-                  :value="option"
-                ></el-option>
-              </el-select>
+              <div class="flex items-center">
+                <el-input
+                  v-model="scope.row.qualityControlValue"
+                  placeholder="请输入数值"
+                  style="width: 30%; margin-right: 10px;"
+                >
+   
+                </el-input>
+                <el-select
+                  v-model="scope.row.quality_control"
+                  placeholder="请选择"
+                  @change="handleQualityControlChange(scope.row)"
+                  style="width: 50%;"
+                >
+                  <el-option
+                    label="现场平行样/批"
+                    value="现场平行样/批"
+                  ></el-option>
+                  <el-option
+                    label="全程序空白样/批"
+                    value="全程序空白样/批"
+                  ></el-option>
+                  <el-option
+                    label="现场空白样/批"
+                    value="现场空白样/批"
+                  ></el-option>
+                  <el-option
+                    label="运输空白样/批"
+                    value="运输空白样/批"
+                  ></el-option>
+                  <el-option
+                    label="密码样/批"
+                    value="密码样/批"
+                  ></el-option>
+                  <el-option
+                    label="加标样/批"
+                    value="加标样/批"
+                  ></el-option>
+                  <el-option label="自定义" value="custom"></el-option>
+                  <el-option
+                    v-for="option in dynamicOptions"
+                    :key="option"
+                    :label="option"
+                    :value="option"
+                  ></el-option>
+                </el-select>
+
+              </div>
               <el-input
-              class="mt-3"
+                class="mt-3"
                 v-if="scope.row.quality_control === 'custom'"
                 v-model="scope.row.customOption"
                 placeholder="请输入自定义选项"
@@ -317,7 +343,7 @@ const downloadNotice = async () => {
       try {
         const formData = new FormData();
         formData.append('order_id', route.params.orderId as string);
-        formData.append('task_id', taskDetail.value.task_number || route.params.taskId as string);
+        formData.append('task_id',  route.params.taskId as string);
         formData.append('qc_number', noticeForm.value.notice_number);
         formData.append('qc_related_office', noticeForm.value.related_offices.join(','));
         
@@ -325,8 +351,8 @@ const downloadNotice = async () => {
           sample_category_id:item.sample_category_id,
           sample_category: item.sample_category,
           test_params: Array.isArray(item.test_params) ? item.test_params.join(',') : item.test_params,
-          sampling_qc_method_a: item.quality_control,
-          sampling_qc_method_b: item.quality_control, // 这里可能需要根据实际情况调整
+          sampling_qc_method_a: item.qualityControlValue+item.quality_control,
+          sampling_qc_method_b: item.qualityControlValue+item.quality_control, // 这里可能需要根据实际情况调整
           sampling_qc_note: item.note
         }));
         formData.append('qcsamplingmethod', JSON.stringify(qcsamplingmethod));
@@ -388,6 +414,7 @@ const addCustomOption = (row: any) => {
 };
 
 const handlePanelConfirm = (data: any) => {
+  samplingItems.value = [];
   // 在这里处理选中的数据，添加到 samplingItems 和 analysisItems
   data.selectedItems.forEach((item: any) => {
     const newItem = {
@@ -395,12 +422,14 @@ const handlePanelConfirm = (data: any) => {
       sample_category: item.sample_category,
       test_params: item.test_params,
       quality_control: "",
+      qualityControlValue: "", // 新增字段
       note: ""
     };
     samplingItems.value.push(newItem);
   });
 };
 const handlePanelConfirm1 = (data: any) => {
+  analysisItems.value = [];
   // 在这里处理选中的数据，添加到 samplingItems 和 analysisItems
   data.selectedItems.forEach((item: any) => {
     const newItem = {
@@ -408,6 +437,7 @@ const handlePanelConfirm1 = (data: any) => {
       sample_category: item.sample_category,
       test_params: item.test_params,
       quality_control: "",
+      // qualityControlValue: "", // 新增字段
       note: ""
     };
     analysisItems.value.push({ ...newItem });

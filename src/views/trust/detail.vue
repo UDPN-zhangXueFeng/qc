@@ -6,7 +6,7 @@
           <span>委托单详情</span>
           <div>
             <el-button @click="goBack">返回</el-button>
-            <el-button @click="printDetail">打印</el-button>
+            <!-- <el-button @click="printDetail">打印</el-button> -->
             <el-button @click="downloadDetail">下载</el-button>
             <el-button @click="deleteDetail">删除</el-button>
             <el-button @click="editDetail">编辑</el-button>

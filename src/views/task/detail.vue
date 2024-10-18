@@ -11,7 +11,7 @@
           </div>
           <div>
             <el-button @click="goBack">返回</el-button>
-            <el-button @click="printDetail">打印</el-button>
+            <!-- <el-button @click="printDetail">打印</el-button> -->
             <el-button @click="downloadDetail">下载</el-button>
             <el-button @click="deleteDetail">删除</el-button>
             <el-button @click="editDetail">编辑</el-button>
@@ -27,20 +27,20 @@
             </div>
           </template>
         <el-descriptions :column="4" border>
-          <el-descriptions-item label="委托单号">{{ taskDetail.order.order_number }}</el-descriptions-item>
-          <el-descriptions-item label="项目名称">{{ taskDetail.order.project_name }}</el-descriptions-item>
-          <el-descriptions-item label="采样地址">{{ taskDetail.order.sampling_address }}</el-descriptions-item>
-          <el-descriptions-item label="是否分包">{{ taskDetail.order.is_subcontract }}</el-descriptions-item>
-          <el-descriptions-item label="检测类别">{{ taskDetail.order.test_category }}</el-descriptions-item>
-          <el-descriptions-item label="完成时间">{{ taskDetail.order.deadline }}</el-descriptions-item>
-          <el-descriptions-item label="委托时间">{{ taskDetail.order.createtime }}</el-descriptions-item>
+          <el-descriptions-item label="任务名称">{{ taskDetail.order.task_name }}</el-descriptions-item>
+          <el-descriptions-item label="任务编号">{{ taskDetail.order.task_number }}</el-descriptions-item>
+          <el-descriptions-item label="关联委托单号">{{ taskDetail.order.order_number }}</el-descriptions-item>
+          <el-descriptions-item label="检测周期">{{ taskDetail.order.test_period }}</el-descriptions-item>
+          <el-descriptions-item label="有关科室">{{ taskDetail.order.task_related_office }}</el-descriptions-item>
+          <el-descriptions-item label="采样地点">{{ taskDetail.order.deadline }}</el-descriptions-item>
           <el-descriptions-item label="制单人">{{ taskDetail.order.createdby }}</el-descriptions-item>
+          <el-descriptions-item label="制单时间">{{ taskDetail.order.createdby }}</el-descriptions-item>
           <el-descriptions-item label="状态">
             <el-tag :type="getStatusType(taskDetail.order.status)">
               {{ taskDetail.order.status === '1' ? '待审核' : '已审核' }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="项目备注">{{ taskDetail.order.project_note }}</el-descriptions-item>
+          <el-descriptions-item label="项目备注">{{ taskDetail.order.task_note }}</el-descriptions-item>
         </el-descriptions>
         </el-card>
         <el-card class="mt-4">

@@ -48,7 +48,7 @@ const router = createRouter({
       component: TrustDetail,
     },
     {
-      path: "/task-create/:id",
+      path: "/task-create",
       name: "TaskCreate",
       component: TaskCreate,
     },

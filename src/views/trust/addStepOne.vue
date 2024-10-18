@@ -335,6 +335,7 @@ const submitForm = () => {
   });
 };
 const sendDataToServer = async (data) => {
+
   try {
     const result = await ElMessageBox.confirm("确定要提交吗？", "提示", {
       confirmButtonText: "确定",
@@ -370,7 +371,7 @@ const sendDataToServer = async (data) => {
         // 暂时保存
         localStorage.setItem("order_id", response.data.order_id);
         ElMessage.success("数据提交成功");
-        router.push("/trust/addStepTwo");
+        router.push("/trust-add-two");
       } else {
         ElMessage.error("数据提交失败");
       }
