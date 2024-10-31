@@ -6,13 +6,7 @@
       <el-step title="提交结果" />
     </el-steps>
 
-    <el-form
-      :model="form"
-      :rules="rules"
-      ref="formRef"
-      label-width="120px"
-      class="mt-4 pb-20"
-    >
+    <el-form :model="form" :rules="rules" ref="formRef" label-width="120px" class="mt-4 pb-20">
       <el-card class="mb-4">
         <template #header>
           <div class="card-header">
@@ -22,65 +16,34 @@
         </template>
 
         <el-form-item label="委托单号" prop="trustNumber" required>
-          <el-input
-            v-model="form.trustNumber"
-            class="w-64"
-            placeholder="后续单号"
-          >
+          <el-input v-model="form.trustNumber" class="w-64" placeholder="后续单号">
             <template #prepend>LPWT</template>
           </el-input>
         </el-form-item>
 
-        <el-form-item
-          label="项目/单位"
-          prop="projectType"
-          required
-          class="flex items-center"
-        >
+        <el-form-item label="项目/单位" prop="projectType" required class="flex items-center">
           <div class="flex items-center space-x-4 flex-grow">
             <el-radio-group v-model="form.projectType" class="flex-shrink-0">
               <el-radio label="project">项目名称</el-radio>
               <el-radio label="unit">受检单位名称</el-radio>
             </el-radio-group>
-            <el-input
-              v-if="form.projectType === 'project'"
-              v-model="form.projectName"
-              class="flex-grow"
-              placeholder="请输入项目名称"
-            />
-            <el-input
-              v-if="form.projectType === 'unit'"
-              v-model="form.unitName"
-              class="flex-grow"
-              placeholder="请输入受检单位名称"
-            />
+            <el-input v-if="form.projectType === 'project'" v-model="form.projectName" class="flex-grow"
+              placeholder="请输入项目名称" />
+            <el-input v-if="form.projectType === 'unit'" v-model="form.unitName" class="flex-grow"
+              placeholder="请输入受检单位名称" />
           </div>
         </el-form-item>
 
-        <el-form-item
-          label="采样/送样"
-          prop="sampleType"
-          required
-          class="flex items-center"
-        >
+        <el-form-item label="采样/送样" prop="sampleType" required class="flex items-center">
           <div class="flex items-center space-x-4 flex-grow">
             <el-radio-group v-model="form.sampleType" class="flex-shrink-0">
               <el-radio label="sampling">采样（点位名称）</el-radio>
               <el-radio label="delivery">送样（来样名称）</el-radio>
             </el-radio-group>
-            <el-input
-              v-if="form.sampleType === 'sampling'"
-              v-model="form.sampleAddress"
-              class="flex-grow"
-              placeholder="请输入采样地址"
-            />
-            <el-date-picker
-              v-if="form.sampleType === 'delivery'"
-              v-model="form.deliveryTime"
-              type="date"
-              placeholder="请选择送样时间"
-              class="w-64"
-            />
+            <el-input v-if="form.sampleType === 'sampling'" v-model="form.sampleAddress" class="flex-grow"
+              placeholder="请输入采样地址" />
+            <el-date-picker v-if="form.sampleType === 'delivery'" v-model="form.deliveryTime" type="date"
+              placeholder="请选择送样时间" class="w-64" />
           </div>
         </el-form-item>
 
@@ -99,38 +62,19 @@
             <el-radio label="委托监测">委托监测</el-radio>
             <el-radio label="其他">其他</el-radio>
           </el-radio-group>
-          <el-input
-            v-if="form.testType === 'other'"
-            v-model="form.otherTestType"
-            class="w-64 ml-2"
-            placeholder="请输入"
-          />
+          <el-input v-if="form.testType === 'other'" v-model="form.otherTestType" class="w-64 ml-2" placeholder="请输入" />
         </el-form-item>
 
         <el-form-item label="完成时间" prop="completionTime" required>
-          <el-date-picker
-            v-model="form.completionTime"
-            type="date"
-            placeholder="请选择"
-          />
+          <el-date-picker v-model="form.completionTime" type="date" placeholder="请选择" />
         </el-form-item>
 
         <el-form-item label="受托时间">
-          <el-date-picker
-            v-model="form.entrustmentTime"
-            type="date"
-            placeholder="默认今天"
-            :disabled="false"
-          />
+          <el-date-picker v-model="form.entrustmentTime" type="date" placeholder="默认今天" :disabled="false" />
         </el-form-item>
 
         <el-form-item label="项目备注">
-          <el-input
-            v-model="form.projectNote"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入"
-          />
+          <el-input v-model="form.projectNote" type="textarea" :rows="3" placeholder="请输入" />
         </el-form-item>
       </el-card>
 
@@ -143,40 +87,23 @@
         </template>
 
         <div class="flex flex-wrap -mx-2">
-          <el-form-item
-            label="单位名称"
-            class="w-full sm:w-1/2 md:w-1/3 px-2 mb-4"
-          >
+          <el-form-item label="单位名称" class="w-full sm:w-1/2 md:w-1/3 px-2 mb-4">
             <el-input v-model="form.clientCompany" placeholder="请输入" />
           </el-form-item>
 
-          <el-form-item
-            label="单位地址"
-            class="w-full sm:w-1/2 md:w-1/3 px-2 mb-4"
-          >
+          <el-form-item label="单位地址" class="w-full sm:w-1/2 md:w-1/3 px-2 mb-4">
             <el-input v-model="form.clientAddress" placeholder="请输入" />
           </el-form-item>
 
-          <el-form-item
-            label="联系人"
-            class="w-full sm:w-1/2 md:w-1/3 px-2 mb-4"
-          >
+          <el-form-item label="联系人" class="w-full sm:w-1/2 md:w-1/3 px-2 mb-4">
             <el-input v-model="form.clientContact" placeholder="请输入" />
           </el-form-item>
 
-          <el-form-item
-            label="联系人电话"
-            prop="clientPhone"
-            class="w-full sm:w-1/2 md:w-1/3 px-2 mb-4"
-          >
+          <el-form-item label="联系人电话" prop="clientPhone" class="w-full sm:w-1/2 md:w-1/3 px-2 mb-4">
             <el-input v-model="form.clientPhone" placeholder="请输入" />
           </el-form-item>
 
-          <el-form-item
-            label="邮箱"
-            prop="clientEmail"
-            class="w-full sm:w-1/2 md:w-1/3 px-2 mb-4"
-          >
+          <el-form-item label="邮箱" prop="clientEmail" class="w-full sm:w-1/2 md:w-1/3 px-2 mb-4">
             <el-input v-model="form.clientEmail" placeholder="请输入" />
           </el-form-item>
         </div>
@@ -193,11 +120,7 @@
             <el-input v-model="form.handlerName" placeholder="请输入" />
           </el-form-item>
 
-          <el-form-item
-            label="受理人电话"
-            prop="handlerPhone"
-            class="w-full sm:w-1/2 px-2 mb-4"
-          >
+          <el-form-item label="受理人电话" prop="handlerPhone" class="w-full sm:w-1/2 px-2 mb-4">
             <el-input v-model="form.handlerPhone" placeholder="请输入" />
           </el-form-item>
         </div>
@@ -337,45 +260,44 @@ const submitForm = () => {
 const sendDataToServer = async (data) => {
 
   try {
-    const result = await ElMessageBox.confirm("确定要提交吗？", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
+    // const result = await ElMessageBox.confirm("确定要提交吗？", "提示", {
+    //   confirmButtonText: "确定",
+    //   cancelButtonText: "取消",
+    //   type: "warning",
+    // });
 
-    if (result === "confirm") {
-      const params = {
-        order_number: data.trustNumber,
-        project_name: data.projectName,
-        tested_company_name: data.unitName,
-        sampling_or_delivery: data.sampleType === "sampling" ? "采样" : "送样",
-        sampling_address: data.sampleAddress,
-        delivery_sample_time: formatDate(data.deliveryTime),
-        is_subcontract: data.isSubcontract ? "是" : "否",
-        test_category: data.testType || data.otherTestType,
-        deadline: formatDate(data.completionTime),
-        project_note: data.projectNote,
-        client_company_name: data.clientCompany,
-        client_company_address: data.clientAddress,
-        client_contact_person: data.clientContact,
-        client_contact_tel: data.clientPhone,
-        client_email: data.clientEmail,
-        handled_by: data.handlerName,
-        handled_by_tel: data.handlerPhone,
-      };
-      console.log("params", params);
-      const response = await request.post("lipu/flow/order/order_add", params);
+    const params = {
+      order_number: data.trustNumber,
+      project_name: data.projectName,
+      tested_company_name: data.unitName,
+      sampling_or_delivery: data.sampleType === "sampling" ? "采样" : "送样",
+      sampling_address: data.sampleAddress,
+      delivery_sample_time: formatDate(data.deliveryTime),
+      is_subcontract: data.isSubcontract ? "是" : "否",
+      test_category: data.testType || data.otherTestType,
+      deadline: formatDate(data.completionTime),
+      project_note: data.projectNote,
+      client_company_name: data.clientCompany,
+      client_company_address: data.clientAddress,
+      client_contact_person: data.clientContact,
+      client_contact_tel: data.clientPhone,
+      client_email: data.clientEmail,
+      handled_by: data.handlerName,
+      handled_by_tel: data.handlerPhone,
+    };
+    console.log("params", params);
+    const response = await request.post("lipu/flow/order/order_add", params);
 
-      console.log("数据发送成功：", response);
-      if (response?.code === 1) {
-        // 暂时保存
-        localStorage.setItem("order_id", response.data.order_id);
-        ElMessage.success("数据提交成功");
-        router.push("/trust-add-two");
-      } else {
-        ElMessage.error("数据提交失败");
-      }
+    console.log("数据发送成功：", response);
+    if (response?.code === 1) {
+      // 暂时保存
+      localStorage.setItem("order_id", response.data.order_id);
+      ElMessage.success("数据提交成功");
+      router.push("/trust-add-two");
+    } else {
+      ElMessage.error("数据提交失败");
     }
+
   } catch (error) {
     if (error !== "cancel") {
       console.error("发送数据时出错：", error);

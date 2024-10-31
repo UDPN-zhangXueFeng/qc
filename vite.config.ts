@@ -20,7 +20,7 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://39.107.73.236:90/CW0sEGxV.php/',
+        target: 'http://47.94.230.110/index.php/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

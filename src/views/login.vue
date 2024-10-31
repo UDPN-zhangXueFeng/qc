@@ -18,7 +18,7 @@ export default defineComponent({
     const login = async () => {
       const formData = new FormData();
       formData.append('username', 'admin');
-      formData.append('password', 'admin123456');
+      formData.append('password', '147256');
       formData.append('__token__', '');
   
       try {
