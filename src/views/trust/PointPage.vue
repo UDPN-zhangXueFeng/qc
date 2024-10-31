@@ -11,7 +11,7 @@
                                 <Upload />
                             </el-icon>
                         </el-button>
-                        <el-button type="danger" circle @click="removeImage(index)">
+                        <el-button type="danger" circle @click="removeImage(index,image.id)">
                             <el-icon>
                                 <Delete />
                             </el-icon>
@@ -38,7 +38,19 @@
             <div class="dialog-content">
                 <el-form :model="formData" :rules="rules" ref="formRef" label-width="80px">
                     <el-form-item label="点位名称" prop="title">
-                        <el-input v-model="formData.title" placeholder="请输入点位名称" />
+                        <el-select 
+                            v-model="formData.title" 
+                            placeholder="请选择点位"
+                            filterable
+                            :loading="pointsLoading"
+                        >
+                            <el-option
+                                v-for="point in pointsList"
+                                :key="point.id"
+                                :label="point.point_name"
+                                :value="point.point_id"
+                            />
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="点位图片" prop="imageUrl">
                         <div class="upload-area" @click="triggerUpload">
@@ -59,13 +71,13 @@
                 <div class="dialog-footer">
                     <el-button @click="cancelAdd">取消</el-button>
                     <el-button type="primary" @click="confirmAdd"
-                        :disabled="!formData.imageUrl || !formData.title.trim()">
+                        :disabled="!formData.imageUrl || !formData.title">
                         保存
                     </el-button>
-                    <el-button type="primary" @click="saveAndContinue"
+                    <!-- <el-button type="primary" @click="saveAndContinue"
                         :disabled="!formData.imageUrl || !formData.title.trim()">
                         保存并继续
-                    </el-button>
+                    </el-button> -->
                 </div>
             </template>
         </el-dialog>
@@ -80,6 +92,7 @@ import request from "@/utils/request";
 import type { FormInstance } from "element-plus";
 
 interface ImageItem {
+    id: string;
     url: string;
     title: string;
     isEditing: boolean;
@@ -151,29 +164,33 @@ const updatePicTitle = async (index: number) => {
             },
         });
         ElMessage.success("更新成功");
+    
     } catch (error) {
         ElMessage.error("更新名称失败");
         console.error("更新名称失败:", error);
     }
 };
 
-// 删除点位图
-const deletePic = async (index: number) => {
+// 修改删除点位图方法
+const deletePic = async (index: number, id: string) => {
     try {
-        await request({
-            url: "/lipu/flow/order/delete_pic",
-            method: "POST",
+        const response:any = await request({
+            url: '/lipu/flow/order/del_pic',
+            method: 'POST',
             data: {
-                order_id: props.orderId,
-                point_id: "1",
-                point_pic_url: imageList.value[index].url,
-            },
+                id:id // 使用图片的id
+            }
         });
-        imageList.value.splice(index, 1);
-        ElMessage.success("删除成功");
+        
+        if (response.code === 1) {
+            fetchPicList();
+            ElMessage.success('删除成功');
+        } else {
+            ElMessage.error(response.message || '删除失败');
+        }
     } catch (error) {
-        ElMessage.error("删除失败");
-        console.error("删除失败:", error);
+        ElMessage.error('删除失败');
+        console.error('删除失败:', error);
     }
 };
 
@@ -207,8 +224,8 @@ const handleFileUpload = (event: Event) => {
 };
 
 // 修改 removeImage 方法
-const removeImage = async (index: number) => {
-    await deletePic(index);
+const removeImage = async (index: number, id: string) => {
+    await deletePic(index, id);
 };
 
 // 修改 finishEdit 方法
@@ -268,7 +285,8 @@ const reupload = async (index: number, id: string) => {
 
                 if (updateResponse.code === 1) {
                     // 更新本地显示的图片
-                    imageList.value[index].url = uploadResponse.src;
+                    // imageList.value[index].url = uploadResponse.src;
+                    fetchPicList();
                     ElMessage.success("更新成功");
                 } else {
                     ElMessage.error(updateResponse.message || "更新失败");
@@ -297,8 +315,7 @@ const formData = ref({
 const formRef = ref<FormInstance>();
 const rules = {
     title: [
-        { required: true, message: "请输入点位名称", trigger: "blur" },
-        { min: 1, message: "点位名称不能为空", trigger: "blur" },
+        { required: true, message: "请输入点位名称", trigger: "change" },
     ],
     imageUrl: [{ required: true, message: "请上传点位图片", trigger: "change" }],
 };
@@ -311,6 +328,7 @@ const showAddDialog = () => {
         imageUrl: "",
         file: null,
     };
+    fetchPoints();
 };
 
 // 取消新增
@@ -346,19 +364,20 @@ const confirmAdd = async () => {
                         method: "POST",
                         data: {
                             order_id: props.orderId,
-                            point_id: "1", // 默认为1
+                            point_id: formData.value.title, // 默认为1
                             point_pic_url: response.src,
                         },
                     });
 
                     if (saveResponse.code === 1) {
-                        imageList.value.push({
-                            url: response.src,
-                            title: formData.value.title,
-                            isEditing: false,
-                        });
-                        ElMessage.success("保存成功");
+                        // imageList.value.push({
+                        //     url: response.src,
+                        //     title: formData.value.title,
+                        //     isEditing: false,
+                        // });
+                        ElMessage.success("保存成功");    
                         dialogVisible.value = false;
+                        fetchPicList();
                     } else {
                         ElMessage.error(saveResponse.message || "保存失败");
                     }
@@ -387,6 +406,33 @@ const saveAndContinue = async () => {
             }
         }
     });
+};
+
+// 添加点位列表相关的响应式数据
+const pointsList = ref<any[]>([]);
+const pointsLoading = ref(false);
+
+// 获取点位列表
+const fetchPoints = async () => {
+    pointsLoading.value = true;
+    try {
+        const response: any = await request({
+            url: '/lipu/flow/order/points',
+            method: 'GET',
+            params: {
+                order_id: props.orderId
+            }
+        });
+
+        if (response.code === 1 && response.data) {
+            pointsList.value = response.data;
+        }
+    } catch (error) {
+        ElMessage.error('获取点位列表失败');
+        console.error('获取点位列表失败:', error);
+    } finally {
+        pointsLoading.value = false;
+    }
 };
 </script>
 
@@ -543,5 +589,10 @@ const saveAndContinue = async () => {
     color: white;
     font-size: 14px;
     padding: 4px 8px;
+}
+
+/* 添加下拉框的样式 */
+:deep(.el-select) {
+    width: 100%;
 }
 </style>
