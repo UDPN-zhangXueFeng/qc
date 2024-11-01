@@ -24,7 +24,7 @@
         <el-table-column type="index" label="序号" width="60" fixed></el-table-column>
         <el-table-column label="操作" width="140" fixed>
           <template #default="{ row, $index }">
-            <el-button type="primary" size="small" @click="editRow(row)" text>编辑</el-button>
+            <!-- <el-button type="primary" size="small" @click="editRow(row)" text>编辑</el-button> -->
             <el-button type="danger" size="small" @click="deleteRow($index)" text>删除</el-button>
           </template>
         </el-table-column>
@@ -48,7 +48,7 @@
         <el-button @click="cancel">取消</el-button>
         <el-button @click="saveAsDraft">保存为草稿</el-button>
         <el-button @click="saveAndCopy">提交并复制新增</el-button>
-        <el-button type="primary" @click="nextStep">下一步</el-button>
+        <el-button type="primary" @click="nextStep">提交</el-button>
       </div>
     </div>
   </div>
@@ -115,6 +115,7 @@ const editRow = (row: TableRow) => {
 };
 
 const deleteRow = (index: number) => {
+  tableData.value.splice(index, 1);return;
   ElMessageBox.confirm("确定要删除这行吗？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
@@ -129,8 +130,30 @@ const deleteRow = (index: number) => {
     });
 };
 
-const downloadTemplate = () => {
-  window.open("http://39.107.73.236:90/gBXIyMsJvW.php/lipu/flow/orderparams/template_download");
+const downloadTemplate = async () => {
+  try {
+    const response = await request({
+      url: '/lipu/flow/orderparams/template_download',
+      method: 'GET',
+      responseType: 'blob'  // 指定响应类型为blob
+    });
+    
+    // 创建下载链接
+    const blob = new Blob([response.data]);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = '委托单-技术方案导入模板.xlsx'; // 设置下载文件名
+    
+    // 触发下载
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    ElMessage.success('模板下载成功');
+  } catch (error) {
+    console.error('下载模板失败:', error);
+    ElMessage.error('下载模板失败');
+  }
 };
 
 const importData = () => {
@@ -237,7 +260,7 @@ const fetchTableData = async () => {
     if (response.code === 1 && response.data && Array.isArray(response.data.list)) {
       tableData.value = response.data.list;
     } else {
-      ElMessage.error(response.msg || "获取数据失败");
+      // ElMessage.error(response.msg || "获取数据失败");
     }
   } catch (error) {
     console.error("Error fetching table data:", error);

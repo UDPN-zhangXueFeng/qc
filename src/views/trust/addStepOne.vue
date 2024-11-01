@@ -292,7 +292,7 @@ const sendDataToServer = async (data) => {
     if (response?.code === 1) {
       // 暂时保存
       localStorage.setItem("order_id", response.data.order_id);
-      ElMessage.success("数据提交成功");
+      // ElMessage.success("数据提交成功");
       router.push("/trust-add-two");
     } else {
       ElMessage.error("数据提交失败");

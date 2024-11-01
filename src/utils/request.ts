@@ -34,6 +34,9 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     // 对响应数据做点什么
     const res = response.data;
+    if (response.config.responseType === 'blob') {
+      return response.data;
+    }
     if (res.code !== 1) {
       // 处理错误情况
       console.error("Response error:", res.message);
