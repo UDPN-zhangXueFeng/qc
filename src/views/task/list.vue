@@ -1,17 +1,12 @@
 <template>
-  <CommonList
-    :searchTitle="'任务搜索'"
-    :listTitle="'任务列表'"
-    :searchFields="searchFields"
-    :tableColumns="tableColumns"
-    :headerActions="headerActions"
-    :rowActions="rowActions"
-    :fetchData="fetchData"
-    @reset="handleReset"
-  >
+  <CommonList :searchTitle="'任务搜索'" :listTitle="'任务列表'" :searchFields="searchFields" :tableColumns="tableColumns"
+    :headerActions="headerActions" :rowActions="rowActions" :fetchData="fetchData" @reset="handleReset">
     <!-- 自定义状态列的插槽 -->
+    <!-- // 1=待接收,2=已接收,3=已拒绝,4=已取消,5=已完成 -->
     <template #status="{ row }">
-      <el-tag :type="getStatusType(row.status_text)">{{ row.status_text }}</el-tag>
+      <el-tag :type="getStatusType(row.status)">{{ row.status === '1' ? '待接收' : row.status === '2' ?
+        '已接收' : row.status === '3' ? '已拒绝' : row.status === '4' ? '已取消' : row.status === '5' ? '已完成' :
+        '--' }}</el-tag>
     </template>
   </CommonList>
 </template>
@@ -20,7 +15,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CommonList from '@/components/CommonList.vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
 import * as XLSX from 'xlsx';
 
@@ -31,22 +26,19 @@ const defaultOrderId = ref(route.params.id as string || '')
 
 const searchFields = computed(() => [
   { prop: 'task_sn', label: '任务编号', component: 'el-input' },
-  { 
-    prop: 'wt_sn', 
-    label: '关联委托单号', 
+  {
+    prop: 'wt_sn',
+    label: '关联委托单号',
     component: 'el-input',
 
   },
-  { 
-    prop: 'related_office', 
-    label: '有关科室', 
+  {
+    prop: 'related_office',
+    label: '有关科室',
     component: 'el-select',
     props: {
       placeholder: '请选择',
       clearable: true,
-      multiple: true,
-      collapseTags: true,
-      collapseTagsTooltip: true,
       options: [
         { value: '采样室', label: '采样室' },
         { value: '质检室', label: '质检室' },
@@ -54,9 +46,9 @@ const searchFields = computed(() => [
       ]
     }
   },
-  { 
-    prop: 'status', 
-    label: '状态', 
+  {
+    prop: 'status',
+    label: '状态',
     component: 'el-select',
     props: {
       placeholder: '请选择',
@@ -64,7 +56,9 @@ const searchFields = computed(() => [
       options: [
         { value: '1', label: '待接收' },
         { value: '2', label: '已接收' },
-        { value: '3', label: '已取消' },
+        { value: '3', label: '已拒绝' },
+        { value: '4', label: '已取消' },
+        { value: '5', label: '已完成' },
         // 添加其他状态选项
       ]
     }
@@ -74,11 +68,11 @@ const searchFields = computed(() => [
 const tableColumns = [
   { prop: 'task_name', label: '任务名称', width: '180' },
   { prop: 'task_number', label: '任务编号', width: '180' },
-  { prop: 'order_id', label: '关联委托单号', width: '180' },
+  { prop: 'order_number', label: '关联委托单号', width: '180' },
   { prop: 'test_period_text', label: '检测周期', width: '120' },
   { prop: 'task_related_office', label: '有关科室', width: '180' },
   { prop: 'task_address', label: '采样地点', width: '180' },
-  { prop: 'status_text', label: '状态', slot: 'status' },
+  { prop: 'status', label: '状态', slot: 'status', width: '120' },
   { prop: 'createdby', label: '制单人', width: '120' },
   { prop: 'createtime', label: '制单时间', width: '180' },
 ]
@@ -127,11 +121,59 @@ const handleView = (row: any) => {
 }
 
 const handleEdit = (row: any) => {
-  // 实现编辑逻辑
+  router.push(`/task-edit/${row.id}`);
 }
 
-const handleDelete = (row: any) => {
-  // 实现删除逻辑
+const handleDelete = async (row: any) => {
+  if (!row.id) {
+    ElMessage.error('任务ID不能为空')
+    return
+  }
+
+  try {
+    // 显示删除确认对话框
+    await ElMessageBox.confirm(
+      '此操作将永久删除该任务，是否继续?',
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+
+    // 调用删除API
+    const response:any = await request({
+      url: '/lipu/flow/task/del_task',
+      method: 'post',
+      data: {
+        task_id: row.id
+      }
+    })
+
+    // 处理响应
+    if (response.code === 1) {
+      ElMessage({
+        type: 'success',
+        message: '删除成功'
+      })
+      // 重新加载列表数据
+      // await fetchData({})
+      location.reload()
+    } else {
+      throw new Error(response.data.msg || '删除失败')
+    }
+  } catch (error: any) {
+    // 用户取消删除操作，不显示错误提示
+    if (error === 'cancel') {
+      return
+    }
+    // 显示错误信息
+    ElMessage({
+      type: 'error',
+      message: error.message || '删除失败，请稍后重试'
+    })
+  }
 }
 
 const headerActions = [
@@ -160,22 +202,15 @@ const fetchData = async (params: any) => {
     if (defaultOrderId.value) {
       params.order_id = defaultOrderId.value
     }
-    // 处理 related_office 参数
-    if (params.related_office) {
-      // 将 Proxy 对象转换为普通数组
-      params.related_office = Array.from(params.related_office);
-      // 或者使用展开运算符：
-      // params.related_office = [...params.related_office];
-    }
 
     const response = await request({
       url: '/lipu/flow/task/task_list',
       method: 'GET',
       params: params
     })
-    
+
     currentTableData.value = response.data.data
-    
+
     return {
       data: response.data.list,
       total: response.data.count
@@ -189,9 +224,9 @@ const fetchData = async (params: any) => {
 
 const getStatusType = (status: any) => {
   const statusMap: Record<string, string> = {
-    '待接收': 'warning',
-    '已接收': 'success',
-    '已取消': 'info'
+    '1': 'warning',
+    '2': 'success',
+    '5': 'info'
   }
   return statusMap[status] || 'default'
 }

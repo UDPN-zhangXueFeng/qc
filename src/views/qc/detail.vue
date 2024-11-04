@@ -101,15 +101,17 @@ onMounted(() => {
 const getStatusType = (status: any) => {
   const statusMap:any = {
     '1': 'warning',
-    '2': 'success'
+    '2': 'success',
+    '3': 'info'
   }
   return statusMap[status] || 'info'
 }
 
 const getStatusText = (status: any) => {
   const statusMap:any = {
-    '1': '待确认',
-    '2': '已确认'
+    '1': '待下发',
+    '2': '已下发',
+    '3': '已取消'
   }
   return statusMap[status] || '未知状态'
 }

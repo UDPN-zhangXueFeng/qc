@@ -97,11 +97,11 @@ const reuploadPointMap = async (index: number, options) => {
       ElMessage.success('重新上传成功');
       await fetchPointMaps();
     } else {
-      ElMessage.error(response.msg || '重新上传失败');
+      // ElMessage.error(response.msg || '重新上传失败');
     }
   } catch (error) {
     console.error('Error reuploading point map:', error);
-    ElMessage.error('重新上传失败');
+    // ElMessage.error('重新上传失败');
   }
 };
 
@@ -129,7 +129,7 @@ const deletePointMap = async (index: number) => {
   } catch (error) {
     if (error !== 'cancel') {
       console.error('Error deleting point map:', error);
-      ElMessage.error('删除失败');
+      // ElMessage.error('删除失败');
     }
   }
 };
@@ -143,11 +143,11 @@ const fetchPointMaps = async () => {
     if (response.code === 1) {
       pointMapImages.value = response.data;
     } else {
-      ElMessage.error(response.msg || '获取点位图失败');
+      // ElMessage.error(response.msg || '获取点位图失败');
     }
   } catch (error) {
     console.error('Error fetching point maps:', error);
-    ElMessage.error('获取点位图失败');
+    // ElMessage.error('获取点位图失败');
   }
 };
 

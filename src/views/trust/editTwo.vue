@@ -1,15 +1,9 @@
 <template>
   <div class="trust-form max-w-5xl mx-auto">
-    <el-steps :active="2" finish-status="success" simple class="mb-8">
-      <el-step title="填写基本信息" />
-      <el-step title="添加技术方案" />
-      <el-step title="提交结果" />
-    </el-steps>
-
     <el-card class="mb-4 mt-4">
       <template #header>
         <div class="flex justify-between items-center">
-          <span class="text-lg font-medium">添加技术方案</span>
+          <span class="text-lg font-medium">编辑技术方案</span>
         </div>
       </template>
 
@@ -17,14 +11,12 @@
         <el-button type="primary" @click="downloadTemplate">下载导入模版</el-button>
         <el-button type="primary" @click="openFileUpload">导入</el-button>
         <input type="file" ref="fileInput" style="display: none;" @change="handleFileUpload" />
-        <!-- <el-button @click="importData">导入</el-button> -->
       </div>
 
       <el-table :data="tableData" border style="width: 100%">
         <el-table-column type="index" label="序号" width="60" fixed></el-table-column>
         <el-table-column label="操作" width="140" fixed>
           <template #default="{ row, $index }">
-            <!-- <el-button type="primary" size="small" @click="editRow(row)" text>编辑</el-button> -->
             <el-button type="danger" size="small" @click="deleteRow($index)" text>删除</el-button>
           </template>
         </el-table-column>
@@ -46,18 +38,16 @@
     <div class="fixed bottom-0 left-0 right-0 bg-white shadow-md z-10">
       <div class="max-w-5xl mx-auto py-4 px-6 flex justify-end space-x-4">
         <el-button @click="cancel">取消</el-button>
-        <el-button @click="saveAsDraft">保存为草稿</el-button>
-        <!-- <el-button @click="saveAndCopy">提交并复制新增</el-button> -->
-        <el-button type="primary" @click="nextStep">提交</el-button>
+        <el-button type="primary" @click="save">保存</el-button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive,onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import request from "@/utils/request";
 
 interface TableRow {
@@ -77,74 +67,23 @@ interface TableRow {
 }
 
 const router = useRouter();
+const route = useRoute();
 const tableData = ref<TableRow[]>([]);
-
 const fileInput = ref<HTMLInputElement | null>(null);
-
-const addRow = () => {
-  tableData.value.push(reactive<TableRow>({
-    id: 0,
-    sample_category: "",
-    point_name: "",
-    point_number: "",
-    test_parms: "",
-    test_frequency: "",
-    test_period: "",
-    test_days: "",
-    sampling_basis_number: "",
-    test_method_number: "",
-    execute_method_number: "",
-    limit_value: "",
-    sampling_params_note: "",
-  }));
-};
-
-const editRow = (row: TableRow) => {
-  ElMessageBox.prompt("编辑行", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    inputValue: JSON.stringify(row),
-  })
-    .then(({ value }) => {
-      Object.assign(row, JSON.parse(value));
-      ElMessage.success("编辑成功");
-    })
-    .catch(() => {
-      ElMessage.info("取消编辑");
-    });
-};
-
-const deleteRow = (index: number) => {
-  tableData.value.splice(index, 1);return;
-  ElMessageBox.confirm("确定要删除这行吗？", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
-  })
-    .then(() => {
-      tableData.value.splice(index, 1);
-      ElMessage.success("删除成功");
-    })
-    .catch(() => {
-      ElMessage.info("已取消删除");
-    });
-};
 
 const downloadTemplate = async () => {
   try {
     const response = await request({
       url: '/lipu/flow/orderparams/template_download',
       method: 'GET',
-      responseType: 'blob'  // 指定响应类型为blob
+      responseType: 'blob'
     });
     
-    // 创建下载链接
     const blob = new Blob([response.data]);
     const downloadLink = document.createElement('a');
     downloadLink.href = URL.createObjectURL(blob);
-    downloadLink.download = '委托单-技术方案导入模板.xlsx'; // 设置下载文件名
+    downloadLink.download = '委托单-技术方案导入模板.xlsx';
     
-    // 触发下载
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -156,36 +95,33 @@ const downloadTemplate = async () => {
   }
 };
 
-const importData = () => {
-  ElMessage.success("数据导入成功");
+const deleteRow = (index: number) => {
+  tableData.value.splice(index, 1);
 };
 
 const cancel = () => {
-  ElMessageBox.confirm("确定要取消吗？未保存的内容将会丢失。", "提示", {
+  ElMessageBox.confirm("确定要取消编辑吗？未保存的修改将会丢失。", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   })
     .then(() => {
-      router.push("/");
+      router.push("/trust-list");
     })
     .catch(() => {
-      // 用户取消操作，不做任何处理
+      // 用户取消操作
     });
 };
 
-const saveAsDraft = () => {
-  console.log("保存为草稿");
-  ElMessage.success("已保存为草稿");
-};
-
-const saveAndCopy = () => {
-  console.log("提交并复制新增");
-  ElMessage.success("已提交并复制新增");
-};
-
-const nextStep = () => {
-  router.push("/trust-add-three");
+const save = async () => {
+  try {
+    // 这里可以添加保存逻辑，如果需要的话
+    ElMessage.success("编辑成功");
+    router.push("/trust-list");
+  } catch (error) {
+    console.error("保存失败:", error);
+    // ElMessage.error("保存失败");
+  }
 };
 
 const openFileUpload = () => {
@@ -205,7 +141,6 @@ const handleFileUpload = async (event: Event) => {
   formData.append("file", file);
 
   try {
-    // 第一步：上传文件
     const uploadResponse: any = await request({
       method: 'POST',
       url: '/lipu/flow/order/testparams_upload',
@@ -218,9 +153,8 @@ const handleFileUpload = async (event: Event) => {
     if (uploadResponse.code === 1) {
       const filePath = uploadResponse.file_path;
       
-      // 第二步：调用导入接口
       const importFormData = new FormData();
-      importFormData.append('order_id', localStorage.getItem('order_id') || '');
+      importFormData.append('order_id', route.params.id as string);
       importFormData.append('file_path', filePath);
 
       const importResponse: any = await request({
@@ -231,7 +165,6 @@ const handleFileUpload = async (event: Event) => {
 
       if (importResponse.code === 1) {
         ElMessage.success("文件导入成功");
-        // 导入成功后，调用接口获取最新的表格数据
         await fetchTableData();
       } else {
         ElMessage.error(importResponse.msg || "导入失败");
@@ -244,7 +177,6 @@ const handleFileUpload = async (event: Event) => {
     ElMessage.error("文件上传和导入过程中出错");
   }
 
-  // 清空文件输入，允许上传相同的文件
   if (fileInput.value) {
     fileInput.value.value = '';
   }
@@ -254,13 +186,11 @@ const fetchTableData = async () => {
   try {
     const response: any = await request({
       method: 'GET',
-      url: `/lipu/flow/order/import_test_params?order_id=${localStorage.getItem('order_id') || ''}`,
+      url: `/lipu/flow/order/import_test_params?order_id=${route.params.id}`,
     });
 
     if (response.code === 1 && response.data && Array.isArray(response.data.list)) {
       tableData.value = response.data.list;
-    } else {
-      // ElMessage.error(response.msg || "获取数据失败");
     }
   } catch (error) {
     console.error("Error fetching table data:", error);
@@ -307,4 +237,4 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 16px;
 }
-</style>
+</style> 

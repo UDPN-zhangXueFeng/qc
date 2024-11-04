@@ -17,7 +17,7 @@
 
         <el-form-item label="委托单号" prop="trustNumber" required>
           <el-input v-model="form.trustNumber" class="w-64" placeholder="后续单号">
-            <template #prepend>LPWT</template>
+            <!-- <template #prepend>LPWT</template> -->
           </el-input>
         </el-form-item>
 
@@ -134,7 +134,7 @@
     <div class="fixed-bottom">
       <div class="button-container">
         <el-button @click="cancel">取消</el-button>
-        <el-button @click="saveAsDraft">保存为草稿</el-button>
+        <!-- <el-button @click="saveAsDraft">保存为草稿</el-button> -->
         <el-button type="primary" @click="submitForm">下一步</el-button>
       </div>
     </div>
@@ -227,7 +227,8 @@ const cancel = () => {
       // 用户确认后，返回上一页
       //   router.go(-1);
       localStorage.removeItem("draft");
-      router.push("/");
+      // router.push("/");
+      router.go(-1);
     })
     .catch(() => {
       // 用户取消操作，不做任何处理
@@ -272,7 +273,7 @@ const sendDataToServer = async (data) => {
       tested_company_name: data.unitName,
       sampling_or_delivery: data.sampleType === "sampling" ? "采样" : "送样",
       sampling_address: data.sampleAddress,
-      delivery_sample_time: formatDate(data.deliveryTime),
+      delivery_sample_time: formatDate(data.entrustmentTime),
       is_subcontract: data.isSubcontract ? "是" : "否",
       test_category: data.testType || data.otherTestType,
       deadline: formatDate(data.completionTime),
@@ -285,7 +286,9 @@ const sendDataToServer = async (data) => {
       handled_by: data.handlerName,
       handled_by_tel: data.handlerPhone,
     };
-    console.log("params", params);
+    localStorage.setItem("draft", JSON.stringify(params));
+    // console.log("params", params);
+    // return;
     const response = await request.post("lipu/flow/order/order_add", params);
 
     console.log("数据发送成功：", response);

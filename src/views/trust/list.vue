@@ -1,28 +1,15 @@
 <template>
-  <CommonList
-    :search-title="'委托单搜索'"
-    :list-title="'委托单列表'"
-    :search-fields="searchFields"
-    :table-columns="tableColumns"
-    :header-actions="headerActions"
-    :row-actions="rowActions"
-    :fetch-data="fetchData"
-    @search="onSearch"
-    @reset="onReset"
-    @pageChange="onPageChange"
-  >
+  <CommonList :search-title="'委托单搜索'" :list-title="'委托单列表'" :search-fields="searchFields" :table-columns="tableColumns"
+    :header-actions="headerActions" :row-actions="rowActions" :fetch-data="fetchData" @search="onSearch"
+    @reset="onReset" @pageChange="onPageChange">
     <template #status="{ row }">
-      <el-tag :type="getStatusType(row.status_text)">{{
-        row.status_text
-      }}</el-tag>
+      <el-tag :type="getStatusType(row.status)">{{
+        row.status === '-1' ? "草稿" : row.status === '1' ? "待审批" : row.status === '2' ? "已通过" : row.status === '3' ?
+          "已驳回" : row.status === '4' ? "已撤回" : "--"
+        }}</el-tag>
     </template>
   </CommonList>
-  <ReviewDialog
-    ref="reviewDialogRef"
-    :order-id="currentOrderId || ''"
-    @close="() => {}"
-    @success="() => {}"
-  />
+  <ReviewDialog ref="reviewDialogRef" :order-id="currentOrderId || ''" @close="() => { }" @success="() => { }" />
 </template>
 
 <script setup lang="ts">
@@ -30,7 +17,7 @@ import { ref, reactive } from "vue";
 import CommonList from "@/components/CommonList.vue";
 import request from "@/utils/request"; // 确保路径正确
 import * as XLSX from "xlsx";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { useRouter } from "vue-router";
 import ReviewDialog from "@/components/ReviewDialog.vue";
 
@@ -60,7 +47,7 @@ const searchFields: any[] = [
     prop: "sampling_or_delivery",
     label: "采样/送样",
     component: "el-select",
-    props: { 
+    props: {
       placeholder: "请选择采样/送样",
       options: [
         { value: "送样", label: "送样" },
@@ -72,7 +59,7 @@ const searchFields: any[] = [
     prop: "is_subcontract",
     label: "是否分包",
     component: "el-select",
-    props: { 
+    props: {
       placeholder: "请选择是否分包",
       options: [
         { value: "是", label: "是" },
@@ -84,9 +71,10 @@ const searchFields: any[] = [
     prop: "status",
     label: "状态",
     component: "el-select",
-    props: { 
+    props: {
       placeholder: "请选择状态",
       options: [
+        { value: "-1", label: "草稿" },
         { value: "1", label: "待审批" },
         { value: "2", label: "已通过" },
         { value: "3", label: "已驳回" },
@@ -109,15 +97,21 @@ const searchFields: any[] = [
 ];
 
 const tableColumns = [
-  { prop: "order_number", label: "委托单号", width: "180",formatter: (row:any) => {
-    return row.order_number===null?"--":row.order_number
-  } },
+  {
+    prop: "order_number", label: "委托单号", width: "180", formatter: (row: any) => {
+      return row.order_number === null ? "--" : row.order_number
+    }
+  },
   { prop: "project_name", label: "项目名称", width: "180" },
   { prop: "sampling_or_delivery_text", label: "采样/送样", width: "120" },
   { prop: "is_subcontract_text", label: "是否分包", width: "100" },
   { prop: "deadline", label: "完成时间", width: "180" },
   { prop: "createtime", label: "委托时间", width: "180" },
-  { prop: "status_text", label: "状态", width: "100", slot: "status" },
+  {
+    prop: "status", label: "状态", width: "100", slot: "status", formatter: (row: any) => {
+      return row.status === null ? "--" : row.status_text
+    }
+  },
   { prop: "createdby", label: "制单人", width: "120" },
   { prop: "createtime", label: "制单时间", width: "180" },
 ];
@@ -126,26 +120,39 @@ const searchForm = reactive({});
 const tableData = ref([]);
 const total = ref(0);
 
-const fetchData = async (params:any) => {
+// 添加一个用于存储当前查询参数的响应式变量
+const currentParams = ref({});
+
+const fetchData = async (params: any) => {
   try {
-    const response = await request({
+    // 保存当前的查询参数
+    currentParams.value = params;
+    
+    const response:any = await request({
       url: "lipu/flow/order/order_list",
       method: "GET",
       params: params,
     });
-    tableData.value = response.data.list;
-    total.value = response.data.count;
-    return {
-      data: response.data.list,
-      total: response.data.count,
-    };
+    
+    if (response.code === 1) {  // 确保API返回成功
+      tableData.value = response.data.list;
+      total.value = response.data.count;
+      return {
+        data: response.data.list,
+        total: response.data.count,
+      };
+    } else {
+      // ElMessage.error(response.msg || '获取数据失败');
+      return { data: [], total: 0 };
+    }
   } catch (error) {
     console.error("获取委托单列表失败:", error);
+    // ElMessage.error('获取数据失败');
     return { data: [], total: 0 };
   }
 };
 
-const onSearch = (formData:any) => {
+const onSearch = (formData: any) => {
   console.log("Search:", formData);
 };
 
@@ -153,7 +160,7 @@ const onReset = () => {
   console.log("Reset search form");
 };
 
-const onPageChange = (page:any) => {
+const onPageChange = (page: any) => {
   console.log("Page changed:", page);
 };
 
@@ -170,8 +177,8 @@ const handleExport = async () => {
     }
 
     // 使用当前搜索条件和表格数据进行导出
-    const excelData = tableData.value.map((item:any) => ({
-      委托单号:item.order_number,
+    const excelData = tableData.value.map((item: any) => ({
+      委托单号: item.order_number,
       项目名称: item.project_name,
       "采样/送样": item.sampling_or_delivery_text,
       是否分包: item.is_subcontract_text,
@@ -206,44 +213,78 @@ const handlePrint = () => {
 const reviewDialogRef = ref<InstanceType<typeof ReviewDialog> | null>(null);
 const currentOrderId = ref<number | string | null>(null);
 
-const handleApprove = (row:any) => {
+const handleApprove = (row: any) => {
   console.log("Approve:", row);
   currentOrderId.value = row.id;
   reviewDialogRef.value?.open();
 };
 
-const handleView = (row:any) => {
+const handleView = (row: any) => {
   router.push(`/trust-detail/${row.id}`);
 };
 
-const handleCopy = (row:any) => {
+const handleCopy = (row: any) => {
   console.log("Copy:", row);
 };
 
-const handleEdit = (row:any) => {
+const handleEdit = (row: any) => {
   console.log("Edit:", row);
+  router.push(`/trust-edit/${row.id}`);
 };
-const handleTask = (row:any) => {
+const handleTask = (row: any) => {
   console.log("Task:", row);
   router.push(`/task-create/${row.id}`);
 };
 
-const handleTaskList = (row:any) => {
+const handleTaskList = (row: any) => {
   router.push(`/task-list`);
 };
 
-const handleDelete = (row:any) => {
-  console.log("Delete:", row);
-};
+const handleDelete = async (row: any) => {
+  try {
+    await ElMessageBox.confirm('确定要删除该委托单吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
 
-const getStatusType = (status:any) => {
+    const formData = new FormData()
+    formData.append('order_id', row.id)
+
+    const response: any = await request({
+      url: 'lipu/flow/order/del_order',
+      method: 'POST',
+      data: formData
+    })
+
+    if (response.code === 1) {
+      ElMessage.success('删除成功')
+      // 使用保存的查询参数重新获取数据
+      // await fetchData(currentParams.value)
+      location.reload()
+    } else {
+      ElMessage.error(response.msg || '删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除失败:', error)
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+const getStatusType = (status: string) => {
   switch (status) {
+    case "1":
+      return "warning";
     case "2":
       return "success";
     case "3":
       return "danger";
-    case "1":
-      return "warning";
+    case "4":
+      return "info";
+    case "-1":
+      return "info";
     default:
       return "info";
   }
@@ -261,9 +302,8 @@ const rowActions = reactive([
   { name: "task", label: "创建任务", handler: handleTask },
   { name: "approve", label: "审批", handler: handleApprove },
   { name: "view", label: "查看详情", handler: handleView },
-  { name: "copy", label: "复制", handler: handleCopy },
+  // { name: "copy", label: "复制", handler: handleCopy },
   { name: "edit", label: "编辑", handler: handleEdit },
   { name: "delete", label: "删除", handler: handleDelete },
 ]);
 </script>
-

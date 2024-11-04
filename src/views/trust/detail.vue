@@ -45,8 +45,13 @@
               trustDetail.createtime
             }}</el-descriptions-item>
             <el-descriptions-item label="状态">
-              <el-tag :type="trustDetail.status === '1' ? 'warning' : 'success'">
-                {{ trustDetail.status === "1" ? "待审核" : "已审核" }}
+              <el-tag
+                :type="trustDetail.status === '1' ? 'warning' : trustDetail.status === '2' ? 'success' : trustDetail.status === '3' ? 'danger' : trustDetail.status === '4' ? 'info' : 'info'">
+                {{ trustDetail.status === '-1' ? "草稿" : trustDetail.status === '1' ? "待审批" : trustDetail.status === '2'
+                  ?
+                  "已通过" : trustDetail.status ===
+                    '3' ?
+                    "已驳回" : trustDetail.status === '4' ? "已撤回" : "--" }}
               </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="项目备注">{{
@@ -116,7 +121,7 @@
               <el-table-column prop="test_frequency" label="检测频次"></el-table-column>
               <el-table-column prop="test_period" label="检测周期"></el-table-column>
               <el-table-column prop="test_days" label="检测天数"></el-table-column>
-              <el-table-column prop="sampling_basis" label="采样依��"></el-table-column>
+              <el-table-column prop="sampling_basis" label="采样依据"></el-table-column>
               <el-table-column prop="test_method" label="检测依据"></el-table-column>
               <el-table-column prop="execute_method" label="执行依据"></el-table-column>
               <el-table-column prop="limit_value" label="限值"></el-table-column>
@@ -144,7 +149,7 @@ import request from "@/utils/request";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import ReviewDialog from "@/components/ReviewDialog.vue";
-import PointPage from './PointPage.vue'; 
+import PointPage from './PointPage.vue';
 
 const router = useRouter();
 const route = useRoute();

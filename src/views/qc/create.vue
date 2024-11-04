@@ -50,7 +50,7 @@
           </el-form-item>
           <el-form-item label="有关科室" prop="related_offices" required>
             <el-checkbox-group v-model="noticeForm.related_offices">
-              <el-checkbox label="原控室"></el-checkbox>
+              <el-checkbox label="质控室"></el-checkbox>
               <el-checkbox label="采样室"></el-checkbox>
               <el-checkbox label="分析室"></el-checkbox>
               <el-checkbox label="业务报告室"></el-checkbox>
@@ -381,17 +381,18 @@ const downloadNotice = async () => {
         
         if (response.code === 1) {
           ElMessage.success("下发成功");
-          router.go(-1);
+          // router.go(-1);
+          router.push('/qc-list');
         } else {
           ElMessage.error(response.msg || "下发失败");
         }
       } catch (error) {
         console.error("Error downloading notice:", error);
-        ElMessage.error("下发失败");
+        // ElMessage.error("下发失败");
       }
     } else {
       console.log('Validation failed:', fields);
-      ElMessage.error("表单验证失败，请检查输入");
+      // ElMessage.error("表单验证失败，请检查输入");
     }
   });
 };

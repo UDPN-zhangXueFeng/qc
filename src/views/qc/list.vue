@@ -11,9 +11,10 @@
     :showActions="true"
   >
     <!-- 自定义状态列的插槽 -->
+    // 1=待下发,2=已下发,3=已取消 
     <template #status="{ row }">
-      <el-tag :type="getStatusType(row.status_text)">{{
-        row.status_text
+      <el-tag :type="getStatusType(row.status)">{{
+        row.status === '1' ? '待下发' : row.status === '2' ? '已下发' : row.status === '3' ? '已取消' : '--'
       }}</el-tag>
     </template>
   </CommonList>
@@ -23,7 +24,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import CommonList from "@/components/CommonList.vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import request from "@/utils/request";
 import * as XLSX from "xlsx";
 
@@ -60,8 +61,8 @@ const searchFields = computed(() => [
       placeholder: "请选择",
       clearable: true,
       options: [
-        { value: "1", label: "待接收" },
-        { value: "2", label: "已接收" },
+        { value: "1", label: "待下发" },
+        { value: "2", label: "已下发" },
         { value: "3", label: "已取消" },
       ],
     },
@@ -69,9 +70,9 @@ const searchFields = computed(() => [
 ]);
 
 const tableColumns = [
-  { prop: "task_number", label: "原控通知单号", width: "150" },
-  { prop: "order_id", label: "关联委托单号", width: "150" },
-  { prop: "task_id", label: "关联任务单号", width: "150" },
+  { prop: "task_number", label: "质控通知单号", width: "150" },
+  { prop: "order_number", label: "关联委托单号", width: "150" },
+  { prop: "qc_number", label: "关联任务单号", width: "150" },
   { prop: "task_related_office", label: "有关科室", width: "120" },
   { prop: "status_text", label: "状态", slot: "status", width: "100" },
   { prop: "createdby", label: "制单人", width: "120" },
@@ -94,9 +95,43 @@ const handleEdit = (row: any) => {
   router.push(`/qc-edit/${row.id}`);
 };
 
-const handleDelete = (row: any) => {
-  // 实现删除逻辑
-};
+const handleDelete = async (row: any) => {
+  try {
+    // 显示确认对话框
+    await ElMessageBox.confirm('确认要删除这条质控单吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+
+    // 准备表单数据
+    const formData = new FormData()
+    formData.append('qc_id', row.id)
+
+    // 调用删除 API
+    const response:any = await request({
+      url: 'lipu/flow/qc/del_qc',
+      method: 'POST',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    if (response.code === 1) {
+      ElMessage.success('删除成功')
+      // 重新加载列表数据
+      location.reload()
+    } else {
+      // ElMessage.error(response.msg || '删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除失败:', error)
+      // ElMessage.error('删除失败，请稍后重试')
+    }
+  }
+}
 
 const headerActions = [
   { name: "export", label: "导出", handler: handleExport },
@@ -137,16 +172,16 @@ const fetchData = async (params: any) => {
     };
   } catch (error) {
     console.error("Failed to fetch task list:", error);
-    ElMessage.error("获取任务列表失败");
+    // ElMessage.error("获取任务列表失败");
     return { data: [], total: 0 };
   }
 };
 
 const getStatusType = (status: any) => {
   const statusMap: Record<string, string> = {
-    待接收: "warning",
-    已接收: "success",
-    已取消: "info",
+    '1': "warning",
+    '2': "success",
+    '3': "info",
   };
   return statusMap[status] || "default";
 };

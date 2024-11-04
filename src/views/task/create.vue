@@ -141,11 +141,11 @@ const fetchOrderOptions = async () => {
     if (response.code === 1 && response.data && response.data.list) {
       orderOptions.value = response.data.list;
     } else {
-      ElMessage.error(response.msg || '获取委托单列表失败');
+      // ElMessage.error(response.msg || '获取委托单列表失败');
     }
   } catch (error) {
     console.error('获取委托单列表失败:', error);
-    ElMessage.error('获取委托单列表失败，请稍后重试');
+    // ElMessage.error('获取委托单列表失败，请稍后重试');
   }
 };
 
@@ -186,11 +186,11 @@ const submitForm = async () => {
           // router.push(`/qc-create/${response.data.task_id}/${route.params.id}`);
 
         } else {
-          ElMessage.error(response.msg || '任务下发失败');
+          // ElMessage.error(response.msg || '任务下发失败');
         }
       } catch (error) {
         console.error('提交失败:', error);
-        ElMessage.error('提交失败，请稍后重试');
+        // ElMessage.error('提交失败，请稍后重试');
       }
     } else {
       console.error("Form validation failed", fields);
@@ -214,11 +214,11 @@ const fetchTaskTestParams = async (wtId: string, testPeriod: string) => {
     if (response.code === 1 && response.data && response.data.list) {
       tableData.value = response.data.list;
     } else {
-      ElMessage.error(response.msg || '获取检测参数失败');
+      // ElMessage.error(response.msg || '获取检测参数失败');
     }
   } catch (error) {
     console.error('获取检测参数失败:', error);
-    ElMessage.error('获取检测参数失败，请稍后重试');
+    // ElMessage.error('获取检测参数失败，请稍后重试');
   }
 };
 

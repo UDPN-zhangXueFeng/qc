@@ -25,7 +25,7 @@
       </el-form>
       
       <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55"></el-table-column>
+        <!-- <el-table-column type="selection" width="55"></el-table-column> -->
         <el-table-column prop="id" label="序号" width="80"></el-table-column>
         <el-table-column prop="category" label="类别"></el-table-column>
         <el-table-column label="检测参数">
