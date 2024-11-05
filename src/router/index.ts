@@ -18,6 +18,7 @@ import QcDetail from "@/views/qc/detail.vue";
 
 import TrustEdit from "@/views/trust/edit.vue";
 import TrustEditTwo from "@/views/trust/editTwo.vue";
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -95,6 +96,11 @@ const router = createRouter({
       path: '/trust-edit-two/:id',
       name: 'TrustEditTwo',
       component: () => import('@/views/trust/editTwo.vue')
+    },
+    {
+      path: '/qc-edit/:id/:taskId/:orderId',
+      name: 'qc-edit',
+      component: () => import('../views/qc/edit.vue')
     },
   ],
 });

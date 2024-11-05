@@ -92,7 +92,7 @@ const handleView = (row: any) => {
 };
 
 const handleEdit = (row: any) => {
-  router.push(`/qc-edit/${row.id}`);
+  router.push(`/qc-edit/${row.id}/${row.task_id}/${row.order_id}`);
 };
 
 const handleDelete = async (row: any) => {

@@ -415,11 +415,9 @@ const addCustomOption = (row: any) => {
 };
 
 const handlePanelConfirm = (data: any) => {
-  samplingItems.value = [];
-  // 在这里处理选中的数据，添加到 samplingItems 和 analysisItems
   data.selectedItems.forEach((item: any) => {
     const newItem = {
-      sample_category_id:data.selectedCategoryId,
+      sample_category_id: data.selectedCategoryId,
       sample_category: item.sample_category,
       test_params: item.test_params,
       quality_control: "",
@@ -429,12 +427,11 @@ const handlePanelConfirm = (data: any) => {
     samplingItems.value.push(newItem);
   });
 };
+
 const handlePanelConfirm1 = (data: any) => {
-  analysisItems.value = [];
-  // 在这里处理选中的数据，添加到 samplingItems 和 analysisItems
   data.selectedItems.forEach((item: any) => {
     const newItem = {
-      sample_category_id:data.selectedCategoryId,
+      sample_category_id: data.selectedCategoryId,
       sample_category: item.sample_category,
       test_params: item.test_params,
       quality_control: "",
