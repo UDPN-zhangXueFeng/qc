@@ -174,9 +174,42 @@ const cancel = () => {
     });
 };
 
-const saveAsDraft = () => {
-  console.log("保存为草稿");
-  ElMessage.success("已保存为草稿");
+const saveAsDraft = async () => {
+  try {
+    // 从 localStorage 获取第一步保存的数据
+    const draftData = JSON.parse(localStorage.getItem('draft') || '{}');
+    
+    // 构建请求数据
+    const formData = new FormData();
+    
+    // 添加第一步的表单数据
+    Object.entries(draftData).forEach(([key, value]) => {
+      formData.append(key, value as string);
+    });
+    
+    // 添加当前页面的技术方案数据
+    // formData.append('test_params', JSON.stringify(tableData.value));
+    console.log("formData", formData);
+    // 发送保存草稿请求
+    const response: any = await request({
+      url: '/lipu/flow/order/order_add_cg',
+      method: 'POST',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    if (response.code === 1) {
+      ElMessage.success('草稿保存成功');
+      router.push('/trust-list');
+    } else {
+      // ElMessage.error(response.msg || '保存失败');
+    }
+  } catch (error) {
+    console.error('保存草稿失败:', error);
+    // ElMessage.error('保存草稿失败');
+  }
 };
 
 const saveAndCopy = () => {
