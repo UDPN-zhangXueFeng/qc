@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive,onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useRouter } from "vue-router";
 import request from "@/utils/request";
@@ -115,7 +115,7 @@ const editRow = (row: TableRow) => {
 };
 
 const deleteRow = (index: number) => {
-  tableData.value.splice(index, 1);return;
+  tableData.value.splice(index, 1); return;
   ElMessageBox.confirm("确定要删除这行吗？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
@@ -135,24 +135,35 @@ const downloadTemplate = async () => {
     const response = await request({
       url: '/lipu/flow/orderparams/template_download',
       method: 'GET',
-      responseType: 'blob'  // 指定响应类型为blob
+      responseType: 'blob',  // 指定响应类型为blob
     });
-    
-    // 创建下载链接
-    const blob = new Blob([response.data]);
+
+    // 检查响应内容
+    if (!response.data) {
+      throw new Error('下载失败：未收到文件数据');
+    }
+
+    // 从响应头获取文件名，如果没有则使用默认文件名
+    const filename = '委托单-技术方案导入模板.xlsx';
+
+    // 直接使用响应数据创建 Blob，因为 response.data 已经是 Blob 类型
+    const blob = response.data;
     const downloadLink = document.createElement('a');
     downloadLink.href = URL.createObjectURL(blob);
-    downloadLink.download = '委托单-技术方案导入模板.xlsx'; // 设置下载文件名
-    
+    downloadLink.download = decodeURIComponent(filename);
+
     // 触发下载
     document.body.appendChild(downloadLink);
     downloadLink.click();
+
+    // 清理
+    URL.revokeObjectURL(downloadLink.href);
     document.body.removeChild(downloadLink);
-    
+
     ElMessage.success('模板下载成功');
   } catch (error) {
     console.error('下载模板失败:', error);
-    ElMessage.error('下载模板失败');
+    // ElMessage.error('下载模板失败');
   }
 };
 
@@ -178,15 +189,15 @@ const saveAsDraft = async () => {
   try {
     // 从 localStorage 获取第一步保存的数据
     const draftData = JSON.parse(localStorage.getItem('draft') || '{}');
-    
+
     // 构建请求数据
     const formData = new FormData();
-    
+
     // 添加第一步的表单数据
     Object.entries(draftData).forEach(([key, value]) => {
       formData.append(key, value as string);
     });
-    
+
     // 添加当前页面的技术方案数据
     // formData.append('test_params', JSON.stringify(tableData.value));
     console.log("formData", formData);
@@ -228,7 +239,7 @@ const openFileUpload = () => {
 const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
-  
+
   if (!file) {
     ElMessage.warning("请选择文件");
     return;
@@ -250,7 +261,7 @@ const handleFileUpload = async (event: Event) => {
 
     if (uploadResponse.code === 1) {
       const filePath = uploadResponse.file_path;
-      
+
       // 第二步：调用导入接口
       const importFormData = new FormData();
       importFormData.append('order_id', localStorage.getItem('order_id') || '');

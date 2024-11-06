@@ -10,6 +10,7 @@ import type {
 const service: AxiosInstance = axios.create({
   baseURL: '/api', // 使用相对路径
   timeout: 5000,
+  responseType: 'json' // 默认响应类型
 });
 
 // 请求拦截器
@@ -32,11 +33,12 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (response: AxiosResponse) => {
+    // 如果是 blob 类型的响应，直接返回响应对象
+    if (response.config.responseType === 'blob') {
+      return response;
+    }
     // 对响应数据做点什么
     const res = response.data;
-    if (response.config.responseType === 'blob') {
-      return response.data;
-    }
     if (res.code !== 1) {
       // 处理错误情况
       console.error("Response error:", res.message);
