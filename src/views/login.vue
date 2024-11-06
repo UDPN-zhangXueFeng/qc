@@ -1,6 +1,6 @@
 <template>
     <!-- 登录页面的模板内容 -->
-  <button @click="goToTrustList">Go to Trust List</button>
+  <button @click="goToTrustList" ></button>
 </template>
   
 <script lang="ts">
@@ -31,6 +31,7 @@ export default defineComponent({
           data: formData,
         });
         console.log(JSON.stringify(response));
+        router.push('/trust-list');
       } catch (error) {
         console.error('Login error:', error);
       }

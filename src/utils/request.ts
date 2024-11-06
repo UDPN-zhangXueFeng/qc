@@ -39,7 +39,7 @@ service.interceptors.response.use(
     }
     // 对响应数据做点什么
     const res = response.data;
-    if (res.code !== 1) {
+    if (Number(res.code) !== 1) {
       // 处理错误情况
       console.error("Response error:", res.message);
       return Promise.reject(new Error(res.message || "Error"));
