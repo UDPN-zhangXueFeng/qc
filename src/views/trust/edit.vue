@@ -246,7 +246,7 @@ const submitForm = () => {
                 formData.append('tested_company_name', form.projectType === 'unit' ? form.unitName : '');
                 formData.append('sampling_or_delivery', form.sampleType === 'sampling' ? '采样' : '送样');
                 formData.append('sampling_address', form.sampleAddress);
-                formData.append('delivery_sample_time', formatDate(form.entrustmentTime) );
+                formData.append('delivery_sample_time', formatDate(form.entrustmentTime));
                 formData.append('is_subcontract', form.isSubcontract ? '是' : '否');
                 formData.append('test_category', form.testType === '其他' ? form.otherTestType : form.testType);
                 formData.append('deadline', formatDate(form.completionTime));
@@ -276,7 +276,8 @@ const submitForm = () => {
 };
 
 const cancel = () => {
-    router.go(-1); return
+    router.go(-1); 
+    return;
     ElMessageBox.confirm("确定要取消编辑吗？未保存的修改将会丢失。", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",

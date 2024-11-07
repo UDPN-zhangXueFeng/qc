@@ -12,12 +12,13 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 // 导入亮色主题
 import 'element-plus/theme-chalk/index.css'
 
+// 设置 Element Plus 主题色
+import './styles/element-theme.css'
+
 const app = createApp(App)
 
-// 使用 ElementPlus，设置中文语言和亮色主题
 app.use(ElementPlus, {
   locale: zhCn,
-  // 明确设置为亮色主题
   size: 'default',
   zIndex: 3000,
 })

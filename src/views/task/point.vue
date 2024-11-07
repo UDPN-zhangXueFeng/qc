@@ -122,6 +122,7 @@ const deletePointMap = async (index: number) => {
 
     if (response.code === 1) {
       ElMessage.success('删除成功');
+      
       pointMapImages.value.splice(index, 1);
     } else {
       ElMessage.error(response.msg || '删除失败');

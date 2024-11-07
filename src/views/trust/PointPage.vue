@@ -16,6 +16,11 @@
                                 <Delete />
                             </el-icon>
                         </el-button>
+                        <el-button type="info" circle @click="previewImage(image.url)">
+                            <el-icon>
+                                <View />
+                            </el-icon>
+                        </el-button>
                     </div>
                 </div>
                 <div class="image-title">
@@ -81,13 +86,18 @@
                 </div>
             </template>
         </el-dialog>
+
+        <!-- Image Preview Dialog -->
+        <el-dialog v-model="previewVisible" title="Image Preview" @close="previewVisible = false">
+            <img :src="previewImageUrl" style="width: 100%; height: auto;" />
+        </el-dialog>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
-import { Plus, Upload, Delete } from "@element-plus/icons-vue";
+import { Plus, Upload, Delete, View } from "@element-plus/icons-vue";
 import request from "@/utils/request";
 import type { FormInstance } from "element-plus";
 
@@ -433,6 +443,16 @@ const fetchPoints = async () => {
     } finally {
         pointsLoading.value = false;
     }
+};
+
+// 新增的响应式数据
+const previewVisible = ref(false);
+const previewImageUrl = ref("");
+
+// 修改 previewImage 方法
+const previewImage = (url: string) => {
+    previewImageUrl.value = url;
+    previewVisible.value = true;
 };
 </script>
 

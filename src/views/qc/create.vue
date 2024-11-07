@@ -218,11 +218,13 @@
       v-model="panelVisible"
       :taskId="route.params.taskId as string"
       @confirm="handlePanelConfirm"
+      :key="panelKey"
     />
     <SlidingPanel 
       v-model="panelVisible1"
       :taskId="route.params.taskId as string"
       @confirm="handlePanelConfirm1"
+      :key="panelKey1"
     />
     <div class="fixed-bottom">
       <div class="button-container">
@@ -292,6 +294,7 @@ onMounted(() => {
 });
 
 const addSamplingItem = () => {
+  panelKey.value++;
   panelVisible.value = true;
 };
 
@@ -304,6 +307,7 @@ const deleteSamplingItem = (index: any) => {
 };
 
 const addAnalysisItem = () => {
+  panelKey1.value++;
   panelVisible1.value = true;
 };
 
@@ -448,6 +452,9 @@ const handlePanelConfirm1 = (data: any) => {
     analysisItems.value.push({ ...newItem });
   });
 };
+
+const panelKey = ref(0);
+const panelKey1 = ref(0);
 </script>
 
 <style scoped>

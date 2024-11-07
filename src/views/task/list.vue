@@ -191,13 +191,42 @@ const handleCreateQc = (row: any) => {
   router.push(`/qc-create/${row.id}/${row.order_id}`);
 }
 
-const rowActions = [
-  { name: 'view', label: '查看详情', handler: handleView },
-  // { name: 'qc', label: '查看质控单', handler: handleQc },
-  { name: 'createQc', label: '创建质控单', handler: handleCreateQc },
-  { name: 'edit', label: '编辑', handler: handleEdit },
-  { name: 'delete', label: '删除', handler: handleDelete },
-]
+const rowActions = computed(() => (row: any) => {
+  const actions = []
+  
+  // 所有状态都显示查看详情
+  actions.push({ name: 'view', label: '查看详情', handler: handleView })
+  
+  switch (row.status) {
+    case '1': // 待接收
+      actions.push(
+        // { name: 'supplement', label: '补充', handler: handleSupplement },
+        // { name: 'reassign', label: '重新指派', handler: handleReassign },
+        // { name: 'cancel', label: '取消分派', handler: handleCancel }
+      )
+      break
+    case '2': // 已接收
+      // actions.push(
+      //   { name: 'reassign', label: '重新指派', handler: handleReassign }
+      // )
+      break
+    case '3': // 拒收
+      actions.push(
+        // { name: 'reassign', label: '重新指派', handler: handleReassign },
+        { name: 'edit', label: '编辑', handler: handleEdit },
+        { name: 'delete', label: '删除', handler: handleDelete }
+      )
+      break
+    case '4': // 已取消
+      actions.push(
+        { name: 'edit', label: '编辑', handler: handleEdit },
+        { name: 'delete', label: '删除', handler: handleDelete }
+      )
+      break
+  }
+  
+  return actions
+})
 
 const fetchData = async (params: any) => {
   try {
@@ -243,5 +272,46 @@ onMounted(() => {
 const currentTableData = ref([])
 const handleReset = () => {
   defaultOrderId.value = ''
+}
+
+// 添加新的处理函数
+const handleSupplement = (row: any) => {
+  // 实现补充功能
+}
+
+const handleReassign = (row: any) => {
+  // 实现重新指派功能
+}
+
+const handleCancel = async (row: any) => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要取消分派该任务吗？',
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    const response = await request({
+      url: '/lipu/flow/task/cancel_task',
+      method: 'post',
+      data: {
+        task_id: row.id
+      }
+    })
+    
+    if (response.code === 1) {
+      ElMessage.success('取消分派成功')
+      fetchData({})
+    } else {
+      throw new Error(response.msg || '取消分派失败')
+    }
+  } catch (error: any) {
+    if (error === 'cancel') return
+    ElMessage.error(error.message || '操作失败')
+  }
 }
 </script>

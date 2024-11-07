@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 space-y-6">
+  <div class=" space-y-6">
     <!-- 搜索栏 Card -->
     <el-card class="box-card">
       <template #header>

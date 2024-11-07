@@ -243,43 +243,57 @@ const saveAsDraft1 = () => {
 };
 
 const saveAsDraft = async () => {
-  try {
-    // 从 localStorage 获取第一步保存的数据
-    // const draftData = JSON.parse(localStorage.getItem('draft') || '{}');
+  formRef.value.validate(async (valid) => {
+    if (valid) {
+      console.log("表单验证通过");
 
-    // 构建请求数据
-    const formData = new FormData();
+      console.log(form);
+      // 创建一个新对象，包含 form 中的所有属性
+      // const formData = { ...form };
+      try {
+        // 从 localStorage 获取第一步保存的数据
+        // const draftData = JSON.parse(localStorage.getItem('draft') || '{}');
 
-    // 添加第一步的表单数据
-    Object.entries(form).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
+        // 构建请求数据
+        const formData = new FormData();
 
-    // 添加当前页面的技术方案数据
-    // formData.append('test_params', JSON.stringify(tableData.value));
-    console.log("formData", formData);
-    // 发送保存草稿请求
-    const response = await request({
-      url: '/lipu/flow/order/order_add_cg',
-      method: 'POST',
-      data: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data'
+        // 添加第一步的表单数据
+        Object.entries(form).forEach(([key, value]) => {
+          formData.append(key, value);
+        });
+
+        // 添加当前页面的技术方案数据
+        // formData.append('test_params', JSON.stringify(tableData.value));
+        console.log("formData", formData);
+        // 发送保存草稿请求
+        const response = await request({
+          url: '/lipu/flow/order/order_add_cg',
+          method: 'POST',
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        if (response.code === 1) {
+          ElMessage.success('草稿保存成功');
+          setTimeout(() => {
+            router.push('/trust-list');
+          }, 1000);
+        } else {
+          // ElMessage.error(response.msg || '保存失败');
+        }
+      } catch (error) {
+        console.error('保存草稿失败:', error);
+        // ElMessage.error('保存草稿失败');
       }
-    });
-
-    if (response.code === 1) {
-      ElMessage.success('草稿保存成功');
-      setTimeout(() => {
-        router.push('/trust-list');
-      }, 1000);
     } else {
-      // ElMessage.error(response.msg || '保存失败');
+      console.log("表单验证失败");
+      //   ElMessage.error('请正确填写必填项');
+      return false;
     }
-  } catch (error) {
-    console.error('保存草稿失败:', error);
-    // ElMessage.error('保存草稿失败');
-  }
+  });
+
 };
 
 const submitForm = () => {
