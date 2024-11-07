@@ -231,7 +231,7 @@ watch(() => [form.order_id, form.test_period], ([newOrderId, newTestPeriod]) => 
 
 <style scoped>
 .new-task-assignment {
-  max-width: 1200px;
+  /* max-width: 1200px; */
   margin: 0 auto;
   padding: 20px;
 }
@@ -272,7 +272,7 @@ watch(() => [form.order_id, form.test_period], ([newOrderId, newTestPeriod]) => 
 }
 
 .button-container {
-  max-width: 1200px;
+  /* max-width: 1200px; */
   margin: 0 auto;
   padding: 16px;
   display: flex;

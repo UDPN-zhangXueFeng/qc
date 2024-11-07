@@ -219,7 +219,7 @@ onMounted(() => {
 
 <style scoped>
 .task-edit {
-    max-width: 1200px;
+    /* max-width: 1200px; */
     margin: 0 auto;
     padding: 20px;
     padding-bottom: 60px;
@@ -246,7 +246,7 @@ onMounted(() => {
 }
 
 .button-container {
-    max-width: 1200px;
+    /* max-width: 1200px; */
     margin: 0 auto;
     padding: 16px;
     display: flex;
