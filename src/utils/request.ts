@@ -8,7 +8,7 @@ import type {
 
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
-  baseURL: '/api', // 使用相对路径
+  baseURL: import.meta.env.VITE_API_KEY, // 根据环境自动切换 baseURL
   timeout: 5000,
   responseType: 'json' // 默认响应类型
 });

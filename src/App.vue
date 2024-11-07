@@ -1,29 +1,39 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
+import { onMounted } from 'vue';
+import request from '@/utils/request';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const login = async () => {
+  const formData = new FormData();
+  formData.append('username', 'admin');
+  formData.append('password', '147256');
+  formData.append('__token__', '');
+
+  try {
+    const response = await request({
+      method: 'post',
+      url: '/index/login',
+      // headers: {
+      //   'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
+      // },
+      data: formData,
+    });
+    console.log(JSON.stringify(response));
+    // router.push('/trust-list');
+  } catch (error) {
+    console.error('Login error:', error);
+  }
+};
+
+onMounted(() => {
+  login();
+});
 </script>
 
 <template>
-  <!-- <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-
-    </div>
-  </header> -->
-  <!-- <div>
-    <nav>
-      <RouterLink to="/new-task">委托单</RouterLink>
-      <RouterLink to="/new-task-add">添加技术方案</RouterLink>
-      <RouterLink to="/submission-success">添加成功</RouterLink>
-      <RouterLink to="/new-task-assignment">任务单</RouterLink>
-      <RouterLink to="/task-detail/1">委托单详情</RouterLink>
-      <RouterLink to="/task-assignment/1">任务分派单详情</RouterLink>
-      <RouterLink to="/quality-control/1">质控单详情</RouterLink>
-    </nav>
-  </div> -->
-
   <RouterView />
 </template>
 

@@ -134,7 +134,7 @@
     <div class="fixed-bottom">
       <div class="button-container">
         <el-button @click="cancel">取消</el-button>
-        <!-- <el-button @click="saveAsDraft">保存为草稿</el-button> -->
+        <el-button @click="saveAsDraft">保存为草稿</el-button>
         <el-button type="primary" @click="submitForm">下一步</el-button>
       </div>
     </div>
@@ -185,7 +185,7 @@ const rules = {
   isSubcontract: [
     { required: true, message: "请选择是否分包", trigger: "change" },
   ],
-  testType: [{ required: true, message: "请选择检测类别", trigger: "change" }],
+  testType: [{ required: true, message: "��选择检测类别", trigger: "change" }],
   completionTime: [
     { required: true, message: "请选择完成时间", trigger: "change" },
   ],
@@ -235,11 +235,51 @@ const cancel = () => {
     });
 };
 
-const saveAsDraft = () => {
+const saveAsDraft1 = () => {
   // 实现保存为草稿的逻辑
   console.log("保存为草稿");
   localStorage.setItem("draft", JSON.stringify(form));
   ElMessage.success("已保存为草稿");
+};
+
+const saveAsDraft = async () => {
+  try {
+    // 从 localStorage 获取第一步保存的数据
+    // const draftData = JSON.parse(localStorage.getItem('draft') || '{}');
+
+    // 构建请求数据
+    const formData = new FormData();
+
+    // 添加第一步的表单数据
+    Object.entries(form).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    // 添加当前页面的技术方案数据
+    // formData.append('test_params', JSON.stringify(tableData.value));
+    console.log("formData", formData);
+    // 发送保存草稿请求
+    const response = await request({
+      url: '/lipu/flow/order/order_add_cg',
+      method: 'POST',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    if (response.code === 1) {
+      ElMessage.success('草稿保存成功');
+      setTimeout(() => {
+        router.push('/trust-list');
+      }, 1000);
+    } else {
+      // ElMessage.error(response.msg || '保存失败');
+    }
+  } catch (error) {
+    console.error('保存草稿失败:', error);
+    // ElMessage.error('保存草稿失败');
+  }
 };
 
 const submitForm = () => {

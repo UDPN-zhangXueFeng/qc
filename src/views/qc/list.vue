@@ -48,7 +48,7 @@ const searchFields = computed(() => [
       collapseTagsTooltip: true,
       options: [
         { value: "采样室", label: "采样室" },
-        { value: "质检室", label: "质检室" },
+        { value: "质控室", label: "质控室" },
         // 添加其他科室选项
       ],
     },
@@ -70,13 +70,13 @@ const searchFields = computed(() => [
 ]);
 
 const tableColumns = [
-  { prop: "task_number", label: "质控通知单号", width: "150" },
-  { prop: "order_number", label: "关联委托单号", width: "150" },
-  { prop: "qc_number", label: "关联任务单号", width: "150" },
+  { prop: "task_number", label: "质控通知单号", width: "250" },
+  { prop: "order_number", label: "关联委托单号", width: "250" },
+  { prop: "qc_number", label: "关联任务单号", width: "250" },
   { prop: "task_related_office", label: "有关科室", width: "120" },
   { prop: "status_text", label: "状态", slot: "status", width: "100" },
   { prop: "createdby", label: "制单人", width: "120" },
-  { prop: "createtime", label: "制单时间", width: "180" },
+  { prop: "createtime", label: "制单时间", width: "" },
 ];
 
 const handleExport = () => {
@@ -121,7 +121,9 @@ const handleDelete = async (row: any) => {
     if (response.code === 1) {
       ElMessage.success('删除成功')
       // 重新加载列表数据
-      location.reload()
+      setTimeout(() => {
+        location.reload()
+      }, 1000)
     } else {
       // ElMessage.error(response.msg || '删除失败')
     }

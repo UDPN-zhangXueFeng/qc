@@ -334,9 +334,14 @@ const downloadNotice = async () => {
   
   await noticeFormRef.value.validate(async (valid, fields) => {
     if (valid) {
-      // 检查采样和分析表格是否有数据
-      if (samplingItems.value.length === 0 && analysisItems.value.length === 0) {
-        ElMessage.error("采样和分析表格至少需要填写一项");
+      // 检查采样和分析表格是否都有数据
+      if (samplingItems.value.length === 0) {
+        ElMessage.error("采样表格必须填写数据");
+        return;
+      }
+      
+      if (analysisItems.value.length === 0) {
+        ElMessage.error("分析表格必须填写数据");
         return;
       }
 
@@ -382,7 +387,9 @@ const downloadNotice = async () => {
         if (response.code === 1) {
           ElMessage.success("下发成功");
           // router.go(-1);
-          router.push('/qc-list');
+          setTimeout(() => {
+            router.push('/qc-list');
+          }, 1000);
         } else {
           ElMessage.error(response.msg || "下发失败");
         }

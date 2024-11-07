@@ -29,7 +29,7 @@
                 <el-form-item label="有关科室" prop="task_related_office" required>
                     <el-checkbox-group v-model="formData.task_related_office">
                         <el-checkbox label="采样室"></el-checkbox>
-                        <el-checkbox label="质检室"></el-checkbox>
+                        <el-checkbox label="质控室"></el-checkbox>
                         <el-checkbox label="分析室"></el-checkbox>
                         <el-checkbox label="业务报告室"></el-checkbox>
                     </el-checkbox-group>

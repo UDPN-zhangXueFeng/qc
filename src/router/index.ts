@@ -19,13 +19,37 @@ import QcDetail from "@/views/qc/detail.vue";
 import TrustEdit from "@/views/trust/edit.vue";
 import TrustEditTwo from "@/views/trust/editTwo.vue";
 
+const getBase = () => {
+  const path = window.location.pathname
+  
+  if (path.includes('/mfe/commission')) return '/mfe/commission/1'
+  if (path.includes('/mfe/task')) return '/mfe/task/1'
+  if (path.includes('/mfe/qc')) return '/mfe/qc/1'
+  return '/mfe/commission/1'
+}
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(getBase()),
   routes: [
     {
-      path: "/",
-      name: "home",
-      component: Login,
+      path: '/:pathMatch(.*)*',  // 捕获所有路由
+      redirect: () => {
+        const path = window.location.pathname
+        
+        // 处理带有 index.html 的情况
+        if (path.endsWith('index.html')) {
+          if (path.includes('/mfe/commission')) return '/trust-list'
+          if (path.includes('/mfe/task')) return '/task-list'
+          if (path.includes('/mfe/qc')) return '/qc-list'
+        }
+        
+        // 处理直接访问基础路径的情况
+        if (path.includes('/mfe/commission')) return '/trust-list'
+        if (path.includes('/mfe/task')) return '/task-list'
+        if (path.includes('/mfe/qc')) return '/qc-list'
+        
+        return '/trust-list'
+      }
     },
     {
       path: "/trust-list",

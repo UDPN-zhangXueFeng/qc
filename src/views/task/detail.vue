@@ -70,7 +70,10 @@
         </el-card>
       </div>
 
-      <PointMap v-else-if="activeTab === 'pointMap'" :taskId="taskDetail.task_id" />
+      <point-page v-else-if="activeTab === 'pointMap'" 
+        :trust-detail="taskDetail" 
+        :order-id="route.params.id" 
+      />
     </el-card>
   </div>
 </template>
@@ -81,7 +84,7 @@ import { useRouter, useRoute } from "vue-router";
 import request from "@/utils/request";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import PointMap from './point.vue';
+import PointPage from '../trust/PointPage.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -113,8 +116,8 @@ onMounted(() => {
   fetchTaskDetail();
 });
 
-const getStatusType = (status) => {
-  const statusMap = {
+const getStatusType = (status: string): string => {
+  const statusMap: Record<string, string> = {
     '1': 'warning',
     '2': 'success'
   }
@@ -128,7 +131,10 @@ const printDetail = () => {
 const downloadDetail = async () => {
   try {
     const element = document.querySelector('.task-detail');
-    const canvas = await html2canvas(element);
+    if (!element) {
+      throw new Error('Element not found');
+    }
+    const canvas = await html2canvas(element as HTMLElement);
     const imgData = canvas.toDataURL('image/png');
 
     const pdf = new jsPDF({

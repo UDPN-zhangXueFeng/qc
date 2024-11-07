@@ -56,7 +56,11 @@
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item v-for="action in rowActions" :key="action.name" @click="action.handler(scope.row)">
+                  <el-dropdown-item 
+                    v-for="action in (typeof rowActions === 'function' ? rowActions(scope.row) : rowActions)" 
+                    :key="action.name" 
+                    @click="action.handler(scope.row)"
+                  >
                     {{ action.label }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -132,7 +136,10 @@ const props = defineProps({
   },
   tableColumns: { type: Array as () => TableColumn[], default: () => [] },
   headerActions: { type: Array as () => Action[], default: () => [] },
-  rowActions: { type: Array as () => Action[], default: () => [] },
+  rowActions: { 
+    type: [Array, Function] as PropType<Action[] | ((row: any) => Action[])>, 
+    default: () => [] 
+  },
   showIndex: { type: Boolean, default: true },
   showActions: { type: Boolean, default: true },
   actionsWidth: { type: String, default: '150' },

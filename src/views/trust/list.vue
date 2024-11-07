@@ -113,7 +113,7 @@ const tableColumns = [
     }
   },
   { prop: "createdby", label: "制单人", width: "120" },
-  { prop: "createtime", label: "制单时间", width: "180" },
+  { prop: "createtime", label: "制单时间", width: "" },
 ];
 
 const searchForm = reactive({});
@@ -261,7 +261,9 @@ const handleDelete = async (row: any) => {
       ElMessage.success('删除成功')
       // 使用保存的查询参数重新获取数据
       // await fetchData(currentParams.value)
-      location.reload()
+      setTimeout(() => {
+        location.reload()
+      }, 1000)
     } else {
       ElMessage.error(response.msg || '删除失败')
     }
@@ -297,13 +299,39 @@ const headerActions = reactive([
   // { name: "print", label: "打印", type: "", handler: handlePrint },
 ]);
 
-const rowActions = reactive([
-  { name: "taskList", label: "查看任务", handler: handleTaskList },
-  { name: "task", label: "创建任务", handler: handleTask },
-  { name: "approve", label: "审批", handler: handleApprove },
-  { name: "view", label: "查看详情", handler: handleView },
-  // { name: "copy", label: "复制", handler: handleCopy },
-  { name: "edit", label: "编辑", handler: handleEdit },
-  { name: "delete", label: "删除", handler: handleDelete },
-]);
+// 将原来的 rowActions 定义修改为一个函数
+const getRowActions = (row: any) => {
+  const actions = [];
+
+  // 查看任务按钮 - 所有状态都可以查看任务
+  // actions.push({ name: "taskList", label: "查看任务", handler: handleTaskList });
+
+  // 创建任务按钮 - 只有已通过的委托单可以创建任务
+  if (row.status === '2') {
+    // actions.push({ name: "task", label: "创建任务", handler: handleTask });
+  }
+
+  // 审批按钮 - 只有待审批状态可以审批
+  if (row.status === '1') {
+    actions.push({ name: "approve", label: "审批", handler: handleApprove });
+  }
+
+  // 查看详情按钮 - 所有状态都可以查看详情
+  actions.push({ name: "view", label: "查看详情", handler: handleView });
+
+  // 编辑按钮 - 只有草稿和已驳回状态可以编辑
+  if (row.status === '-1' || row.status === '3') {
+    actions.push({ name: "edit", label: "编辑", handler: handleEdit });
+  }
+
+  // 删除按钮 - 只有草稿和已驳回状态可以删除
+  if (row.status === '-1' || row.status === '3') {
+    actions.push({ name: "delete", label: "删除", handler: handleDelete });
+  }
+
+  return actions;
+};
+
+// 在 CommonList 组件中使用时，传递一个函数而不是固定的数组
+const rowActions = getRowActions;
 </script>

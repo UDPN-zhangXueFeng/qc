@@ -48,7 +48,7 @@
         <el-form-item label="有关科室" prop="task_related_office" required>
           <el-checkbox-group v-model="form.task_related_office">
             <el-checkbox label="采样室"></el-checkbox>
-            <el-checkbox label="质检室"></el-checkbox>
+            <el-checkbox label="质控室"></el-checkbox>
             <el-checkbox label="分析室"></el-checkbox>
             <el-checkbox label="业务报告室"></el-checkbox>
           </el-checkbox-group>
@@ -182,8 +182,8 @@ const submitForm = async () => {
 
         if (response.code === 1) {
           ElMessage.success('任务下发成功');
-          router.push(`/task-detail/${response.data.task_id}`); // 提交成功后跳转到首页
-          // router.push(`/qc-create/${response.data.task_id}/${route.params.id}`);
+          // router.push(`/task-detail/${response.data.task_id}`); // 提交成功后跳转到首页
+          router.push(`/qc-create/${response.data.task_id}/${route.params.id}`);
 
         } else {
           // ElMessage.error(response.msg || '任务下发失败');

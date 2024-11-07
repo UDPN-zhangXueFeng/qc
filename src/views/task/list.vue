@@ -41,7 +41,7 @@ const searchFields = computed(() => [
       clearable: true,
       options: [
         { value: '采样室', label: '采样室' },
-        { value: '质检室', label: '质检室' },
+        { value: '质控室', label: '质控室' },
         // 添加其他科室选项
       ]
     }
@@ -74,7 +74,7 @@ const tableColumns = [
   { prop: 'task_address', label: '采样地点', width: '180' },
   { prop: 'status', label: '状态', slot: 'status', width: '120' },
   { prop: 'createdby', label: '制单人', width: '120' },
-  { prop: 'createtime', label: '制单时间', width: '180' },
+  { prop: 'createtime', label: '制单时间', width: '' },
 ]
 const handleAdd = () => {
   router.push(`/task-create/${defaultOrderId.value}`);
@@ -159,7 +159,9 @@ const handleDelete = async (row: any) => {
       })
       // 重新加载列表数据
       // await fetchData({})
-      location.reload()
+      setTimeout(() => {
+        location.reload()
+      }, 1000)
     } else {
       throw new Error(response.data.msg || '删除失败')
     }
@@ -191,7 +193,7 @@ const handleCreateQc = (row: any) => {
 
 const rowActions = [
   { name: 'view', label: '查看详情', handler: handleView },
-  { name: 'qc', label: '查看质控单', handler: handleQc },
+  // { name: 'qc', label: '查看质控单', handler: handleQc },
   { name: 'createQc', label: '创建质控单', handler: handleCreateQc },
   { name: 'edit', label: '编辑', handler: handleEdit },
   { name: 'delete', label: '删除', handler: handleDelete },
