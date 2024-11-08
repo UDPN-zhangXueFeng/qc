@@ -37,7 +37,7 @@
             <el-descriptions-item label="制单时间">{{ taskDetail.order.createdby }}</el-descriptions-item>
             <el-descriptions-item label="状态">
               <el-tag :type="getStatusType(taskDetail.order.status)">
-                {{ taskDetail.order.status === '1' ? '待审核' : taskDetail.order.status === '2' ? '已审核' :
+                {{ taskDetail.order.status === '1' ? '待接收' : taskDetail.order.status === '2' ? '已接收' :
                   taskDetail.order.status
                     === '3' ? '已拒绝' : taskDetail.order.status === '4' ? '已取消' : taskDetail.order.status === '5' ? '已完成' :
                 '--' }}
