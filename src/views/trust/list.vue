@@ -1,5 +1,5 @@
 <template>
-  <CommonList :search-title="'委托单搜索'" :list-title="'委托单列表'" :search-fields="searchFields" :table-columns="tableColumns"
+  <CommonList ref="commonListRef" :search-title="'委托单搜索'" :list-title="'委托单列表'" :search-fields="searchFields" :table-columns="tableColumns"
     :header-actions="headerActions" :row-actions="rowActions" :fetch-data="fetchData" @search="onSearch"
     @reset="onReset" @pageChange="onPageChange">
     <template #status="{ row }">
@@ -9,7 +9,7 @@
         }}</el-tag>
     </template>
   </CommonList>
-  <ReviewDialog ref="reviewDialogRef" :order-id="currentOrderId || ''" @close="() => { }" @success="() => { }" />
+  <ReviewDialog ref="reviewDialogRef" :order-id="currentOrderId || ''" @close="() => { }" @success="handleReviewSuccess" />
 </template>
 
 <script setup lang="ts">
@@ -120,8 +120,11 @@ const searchForm = reactive({});
 const tableData = ref([]);
 const total = ref(0);
 
-// 添加一个用于存储当前查询参数的响应式变量
-const currentParams = ref({});
+// 将 currentParams 的类型定义修改为更具体的类型
+const currentParams = ref<{
+  page?: number;
+  [key: string]: any;
+}>({});
 
 const fetchData = async (params: any) => {
   try {
@@ -154,6 +157,8 @@ const fetchData = async (params: any) => {
 
 const onSearch = (formData: any) => {
   console.log("Search:", formData);
+  // 更新当前参数
+  Object.assign(currentParams.value, formData);
 };
 
 const onReset = () => {
@@ -259,11 +264,8 @@ const handleDelete = async (row: any) => {
 
     if (response.code === 1) {
       ElMessage.success('删除成功')
-      // 使用保存的查询参数重新获取数据
-      // await fetchData(currentParams.value)
-      setTimeout(() => {
-        location.reload()
-      }, 1000)
+      // 直接调用 CommonList 组件的 loadData 方法
+      commonListRef.value?.loadData()
     } else {
       ElMessage.error(response.msg || '删除失败')
     }
@@ -305,7 +307,7 @@ const getRowActions = (row: any) => {
 
   // 查看任务按钮 - 所有状态都可以查看任务
   // actions.push({ name: "taskList", label: "查看任务", handler: handleTaskList });
-
+  // actions.push({ name: "delete", label: "删除", handler: handleDelete });
   // 创建任务按钮 - 只有已通过的委托单可以创建任务
   if (row.status === '2') {
     // actions.push({ name: "task", label: "创建任务", handler: handleTask });
@@ -313,7 +315,7 @@ const getRowActions = (row: any) => {
 
   // 审批按钮 - 只有待审批状态可以审批
   if (row.status === '1') {
-    actions.push({ name: "approve", label: "审批", handler: handleApprove });
+    actions.push({ name: "approve", label: "审核", handler: handleApprove });
   }
 
   // 查看详情按钮 - 所有状态都可以查看详情
@@ -334,4 +336,24 @@ const getRowActions = (row: any) => {
 
 // 在 CommonList 组件中使用时，传递一个函数而不是固定的数组
 const rowActions = getRowActions;
+
+// 添加 handleSearch 方法
+const handleSearch = () => {
+  // 触发 CommonList 组件内部的搜索逻辑
+  if (searchForm) {
+    Object.assign(currentParams.value, searchForm);
+  }
+  // 重置到第一页
+  if (currentParams.value.page) {
+    currentParams.value.page = 1;
+  }
+};
+
+// 添加 ref 引用
+const commonListRef = ref();
+
+const handleReviewSuccess = () => {
+  // 刷新列表数据
+  commonListRef.value?.loadData();
+};
 </script>

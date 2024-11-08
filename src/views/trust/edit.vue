@@ -294,7 +294,7 @@ const cancel = () => {
 
 <style scoped>
 .trust-form {
-    max-width: 1000px;
+    /* max-width: 1000px; */
     margin: 0 auto;
 }
 
@@ -315,7 +315,7 @@ const cancel = () => {
 }
 
 .button-container {
-    max-width: 1000px;
+    /* max-width: 1000px; */
     margin: 0 auto;
     padding: 16px;
     display: flex;

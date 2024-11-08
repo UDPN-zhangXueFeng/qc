@@ -21,6 +21,7 @@
 
         <el-form-item label="检测周期" prop="test_period" required>
           <el-select v-model="form.test_period" placeholder="请选择检测周期">
+            <el-option label="/" value="/"></el-option>
             <el-option label="周检" value="周检"></el-option>
             <el-option label="月检" value="月检"></el-option>
             <el-option label="季检" value="季检"></el-option>

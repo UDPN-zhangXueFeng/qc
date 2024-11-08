@@ -115,7 +115,7 @@ const editRow = (row: TableRow) => {
 };
 
 const deleteRow = (index: number) => {
-  tableData.value.splice(index, 1); return;
+  // tableData.value.splice(index, 1); return;
   ElMessageBox.confirm("确定要删除这行吗？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
@@ -319,7 +319,7 @@ onMounted(() => {
 
 <style scoped>
 .trust-form {
-  max-width: 1000px;
+  /* max-width: 1000px; */
   margin: 0 auto;
 }
 
@@ -344,7 +344,7 @@ onMounted(() => {
 }
 
 .button-container {
-  max-width: 1000px;
+  /* max-width: 1000px; */
   margin: 0 auto;
   padding: 16px;
   display: flex;

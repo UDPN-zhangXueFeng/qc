@@ -72,7 +72,7 @@
     }
   
     try {
-      const response = await request.post('lipu/flow/order/audit', {
+      const response: any = await request.post('lipu/flow/order/audit', {
         order_id: props.orderId,
         operate: form.value.result,
         operate_note: form.value.comment
@@ -82,13 +82,13 @@
         ElMessage.success('审核成功');
         emit('success');
         handleClose();
-        router.push('/');
+        // router.push('/');
       } else {
-        ElMessage.error(response.message || '审核失败');
+        ElMessage.error(response.msg || '审核失败');
       }
     } catch (error) {
       console.error('审核失败:', error);
-      ElMessage.error('审核失败，请稍后重试');
+      // ElMessage.error('审核失败，请稍后重试');
     }
   };
   

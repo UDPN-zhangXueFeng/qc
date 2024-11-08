@@ -247,6 +247,10 @@ const updateFieldValue = (prop: string | string[], value: any): void => {
 }
 
 watch(() => props.searchFields, initSearchForm, { immediate: true })
+
+defineExpose({
+  loadData
+})
 </script>
 
 <style scoped>

@@ -366,7 +366,7 @@ const sendDataToServer = async (data) => {
 
 <style scoped>
 .trust-form {
-  max-width: 1000px;
+  /* max-width: 1000px; */
   margin: 0 auto;
 }
 
@@ -387,7 +387,7 @@ const sendDataToServer = async (data) => {
 }
 
 .button-container {
-  max-width: 1000px;
+  /* max-width: 1000px; */
   margin: 0 auto;
   padding: 16px;
   display: flex;
