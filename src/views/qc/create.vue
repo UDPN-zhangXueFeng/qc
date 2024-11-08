@@ -337,7 +337,7 @@ const saveNotice = async () => {
 };
 
 const goBack = () => {
-  router.go(-1);
+  router.push(`/qc-list`);
 };
 
 const loading = ref(false);
