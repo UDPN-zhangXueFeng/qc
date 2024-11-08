@@ -39,7 +39,7 @@
       <div class=" mx-auto py-4 px-6 flex justify-end space-x-4">
         <el-button @click="backStepOne">返回上一步</el-button>
         <el-button @click="cancel">取消</el-button>
-        <el-button type="primary" @click="save">保存</el-button>
+        <el-button type="primary" @click="save">提交</el-button>
       </div>
     </div>
   </div>

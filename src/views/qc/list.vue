@@ -12,7 +12,7 @@
     :showActions="true"
   >
     <!-- 自定义状态列的插槽 -->
-    // 1=待下发,2=已下发,3=已取消 
+    <!-- // 1=待下发,2=已下发,3=已取消  -->
     <template #status="{ row }">
       <el-tag :type="getStatusType(row.status)">{{
         row.status === '1' ? '待下发' : row.status === '2' ? '已下发' : row.status === '3' ? '已取消' : '--'
@@ -142,11 +142,21 @@ const headerActions = [
   { name: "export", label: "导出", handler: handleExport },
 ];
 
-const rowActions = [
-  { name: "view", label: "查看详情", handler: handleView },
-  { name: "edit", label: "编辑", handler: handleEdit },
-  { name: "delete", label: "删除", handler: handleDelete },
-];
+const rowActions = computed(() => (row: any) => {
+  const actions = [
+    { name: "view", label: "查看详情", handler: handleView },
+  ];
+
+  // 只有待下发状态(status=1)可以编辑和删除
+  if (row.status === '1') {
+    actions.push(
+      { name: "edit", label: "编辑", handler: handleEdit },
+      { name: "delete", label: "删除", handler: handleDelete }
+    );
+  }
+
+  return actions;
+});
 
 const currentTableData = ref([]);
 

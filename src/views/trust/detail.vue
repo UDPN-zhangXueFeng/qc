@@ -10,7 +10,8 @@
             <el-button @click="downloadDetail">下载</el-button>
             <el-button @click="deleteDetail"    v-if="trustDetail.status === '-1' || trustDetail.status === '3'">删除</el-button>
             <el-button @click="editDetail"    v-if="trustDetail.status === '-1' || trustDetail.status === '3'">编辑</el-button>
-            <el-button type="primary" @click="openReviewDialog" :disabled="trustDetail.status === '2'">
+            
+            <el-button type="primary" v-if="trustDetail.status !== '-1'" @click="openReviewDialog"  :disabled="trustDetail.status === '2'">
               {{ trustDetail.status === '2' ? '已审核' : '审核' }}
             </el-button>
           </div>

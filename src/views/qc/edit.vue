@@ -63,7 +63,7 @@
                     <el-table-column type="index" label="序号" width="50"></el-table-column>
                     <el-table-column label="操作" width="100">
                         <template #default="scope">
-                            <el-button type="text" @click="editSamplingItem(scope.row)">编辑</el-button>
+                            <!-- <el-button type="text" @click="editSamplingItem(scope.row)">编辑</el-button> -->
                             <el-button type="text" @click="deleteSamplingItem(scope.$index)">删除</el-button>
                         </template>
                     </el-table-column>
@@ -77,15 +77,16 @@
                                 </el-input>
                                 <el-select v-model="scope.row.quality_control" placeholder="请选择"
                                     @change="handleQualityControlChange(scope.row)" style="width: 50%;">
-                                    <el-option label="现场平行样/批" value="现场平行样/批"></el-option>
-                                    <el-option label="全程序空白样/批" value="全程序空白样/批"></el-option>
-                                    <el-option label="现场空白样/批" value="现场空白样/批"></el-option>
-                                    <el-option label="运输空白样/批" value="运输空白��/批"></el-option>
-                                    <el-option label="密码样/批" value="密码样/批"></el-option>
-                                    <el-option label="加标样/批" value="加标样/批"></el-option>
                                     <el-option label="自定义" value="custom"></el-option>
                                     <el-option v-for="option in dynamicOptions" :key="option" :label="option"
                                         :value="option"></el-option>
+                                    <el-option label="现场平行样/批" value="现场平行样/批"></el-option>
+                                    <el-option label="全程序空白样/批" value="全程序空白样/批"></el-option>
+                                    <el-option label="现场空白样/批" value="现场空白样/批"></el-option>
+                                    <el-option label="运输空白样/批" value="运输空白样/批"></el-option>
+                                    <el-option label="密码样/批" value="密码样/批"></el-option>
+                                    <el-option label="加标样/批" value="加标样/批"></el-option>
+       
                                 </el-select>
                             </div>
                             <el-input class="mt-3" v-if="scope.row.quality_control === 'custom'"
@@ -117,7 +118,7 @@
                     <el-table-column type="index" label="序号" width="50"></el-table-column>
                     <el-table-column label="操作" width="100">
                         <template #default="scope">
-                            <el-button type="text" @click="editAnalysisItem(scope.row)">编辑</el-button>
+                            <!-- <el-button type="text" @click="editAnalysisItem(scope.row)">编辑</el-button> -->
                             <el-button type="text" @click="deleteAnalysisItem(scope.$index)">删除</el-button>
                         </template>
                     </el-table-column>
@@ -137,13 +138,13 @@
             </el-card>
         </div>
 
-        <SlidingPanel v-model="panelVisible" :taskId="route.params.taskId as string" @confirm="handlePanelConfirm" />
-        <SlidingPanel v-model="panelVisible1" :taskId="route.params.taskId as string" @confirm="handlePanelConfirm1" />
+        <SlidingPanel       :key="panelKey" v-model="panelVisible" :taskId="route.params.taskId as string" @confirm="handlePanelConfirm" />
+        <SlidingPanel       :key="panelKey1" v-model="panelVisible1" :taskId="route.params.taskId as string" @confirm="handlePanelConfirm1" />
 
         <div class="fixed-bottom">
             <div class="button-container">
                 <el-button @click="goBack">取消</el-button>
-                <el-button @click="saveNotice">提交</el-button>
+                <el-button type="primary" :loading="isSubmitting" @click="saveNotice">下发</el-button>
             </div>
         </div>
     </div>
@@ -159,7 +160,8 @@ import SlidingPanel from '@/components/SlidingPanel.vue';
 
 const router = useRouter();
 const route = useRoute();
-
+const panelKey = ref(0);
+const panelKey1 = ref(0);
 // 初始化数据
 const taskDetail = ref<any>(null);
 const noticeForm = ref({
@@ -173,6 +175,9 @@ const panelVisible1 = ref(false);
 
 // 动态选项
 const dynamicOptions = ref<string[]>([]);
+
+// 添加 loading ref
+const isSubmitting = ref(false);
 
 // 处理质控措施变化
 const handleQualityControlChange = (row: any) => {
@@ -192,6 +197,7 @@ const addCustomOption = (row: any) => {
 
 // 添加采样项目
 const addSamplingItem = () => {
+    panelKey.value++;
     panelVisible.value = true;
 };
 
@@ -207,6 +213,7 @@ const deleteSamplingItem = (index: number) => {
 
 // 添加分析项目
 const addAnalysisItem = () => {
+    panelKey1.value++;
     panelVisible1.value = true;
 };
 
@@ -250,12 +257,12 @@ const handlePanelConfirm1 = (data: any) => {
 
 // 返回上一页
 const goBack = () => {
-    router.go(-1);
+    router.push(`/qc-list`);
 };
 
 // 保存通知
 const saveNotice = async () => {
-    if (!noticeFormRef.value) return;
+    if (!noticeFormRef.value || isSubmitting.value) return;
 
     await noticeFormRef.value.validate(async (valid, fields) => {
         if (valid) {
@@ -266,6 +273,7 @@ const saveNotice = async () => {
             }
 
             try {
+                isSubmitting.value = true;
                 const formData = new FormData();
                 formData.append('qc_id', route.params.id as string);
                 formData.append('order_id', route.params.orderId as string);
@@ -307,11 +315,13 @@ const saveNotice = async () => {
                     ElMessage.success("修改成功");
                     router.push('/qc-list');
                 } else {
-                    //   ElMessage.error(response.msg || "保存失败");
+                    ElMessage.error(response.msg || "保存失败");
                 }
             } catch (error) {
                 console.error("Error saving notice:", error);
-                // ElMessage.error("保存失败");
+                ElMessage.error("保存失败");
+            } finally {
+                isSubmitting.value = false;
             }
         } else {
             console.log('Validation failed:', fields);
@@ -359,7 +369,7 @@ const fetchQcDetail = async () => {
             // 设置通知表单数据
             noticeForm.value = {
                 notice_number: data.qc_info.qc_number,
-                related_offices: data.qc_info.qc_related_office.split(',')
+                related_offices: data.qc_info.qc_related_office===null?[]:data.qc_info.qc_related_office.split(',')
             };
 
             // 设置采样项目
@@ -383,7 +393,7 @@ const fetchQcDetail = async () => {
         }
     } catch (error) {
         console.error('获取质控单详情失败:', error);
-        ElMessage.error('获取质控单详情失败');
+        // ElMessage.error('获取质控单详情失败');
     }
 };
 

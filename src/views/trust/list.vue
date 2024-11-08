@@ -171,6 +171,7 @@ const onPageChange = (page: any) => {
 
 const handleAdd = () => {
   console.log("Add new item");
+  localStorage.removeItem("draft");
   router.push("/trust-add-one");
 };
 

@@ -180,9 +180,9 @@
           ></el-table-column>
           <el-table-column label="操作" width="100">
             <template #default="scope">
-              <el-button type="text" @click="editAnalysisItem(scope.row)"
+              <!-- <el-button type="text" @click="editAnalysisItem(scope.row)"
                 >编辑</el-button
-              >
+              > -->
               <el-button type="text" @click="deleteAnalysisItem(scope.$index)"
                 >删除</el-button
               >
@@ -288,11 +288,11 @@ const fetchTaskDetail = async () => {
     if (response.code === 1) {
       taskDetail.value = response.data.order;
     } else {
-      ElMessage.error("获取任务详情失败");
+      // ElMessage.error("获取任务详情失败");
     }
   } catch (error) {
     console.error("Error fetching task detail:", error);
-    ElMessage.error("获取任务详情失败");
+    // ElMessage.error("获取任务详情失败");
   }
 };
 

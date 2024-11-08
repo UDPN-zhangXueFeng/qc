@@ -13,8 +13,8 @@
             <el-button @click="goBack">返回</el-button>
             <!-- <el-button @click="printDetail">打印</el-button> -->
             <el-button @click="downloadDetail">下载</el-button>
-            <el-button @click="deleteDetail">删除</el-button>
-            <el-button @click="editDetail">编辑</el-button>
+            <el-button @click="deleteDetail" v-if="taskDetail.order.status !== '1'">删除</el-button>
+            <el-button @click="editDetail" v-if="taskDetail.order.status !== '1'">编辑</el-button>
           </div>
         </div>
       </template>

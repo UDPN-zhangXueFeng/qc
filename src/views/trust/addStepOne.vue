@@ -69,7 +69,7 @@
           <el-date-picker v-model="form.completionTime" type="date" placeholder="请选择" />
         </el-form-item>
 
-        <el-form-item label="受托时间">
+        <el-form-item label="委托时间">
           <el-date-picker v-model="form.entrustmentTime" type="date" placeholder="默认今天" :disabled="false" />
         </el-form-item>
 
