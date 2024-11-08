@@ -74,9 +74,9 @@
           ></el-table-column>
           <el-table-column label="操作" width="100">
             <template #default="scope">
-              <el-button type="text" @click="editSamplingItem(scope.row)"
+              <!-- <el-button type="text" @click="editSamplingItem(scope.row)"
                 >编辑</el-button
-              >
+              > -->
               <el-button type="text" @click="deleteSamplingItem(scope.$index)"
                 >删除</el-button
               >
@@ -106,6 +106,13 @@
                   @change="handleQualityControlChange(scope.row)"
                   style="width: 50%;"
                 >
+                <el-option label="自定义" value="custom"></el-option>
+                  <el-option
+                    v-for="option in dynamicOptions"
+                    :key="option"
+                    :label="option"
+                    :value="option"
+                  ></el-option>
                   <el-option
                     label="现场平行样/批"
                     value="现场平行样/批"
@@ -130,13 +137,7 @@
                     label="加标样/批"
                     value="加标样/批"
                   ></el-option>
-                  <el-option label="自定义" value="custom"></el-option>
-                  <el-option
-                    v-for="option in dynamicOptions"
-                    :key="option"
-                    :label="option"
-                    :value="option"
-                  ></el-option>
+
                 </el-select>
 
               </div>
@@ -229,8 +230,13 @@
     <div class="fixed-bottom">
       <div class="button-container">
         <el-button @click="goBack">取消</el-button>
-        <el-button @click="saveNotice">保存</el-button>
-        <el-button type="primary" @click="downloadNotice">下发</el-button>
+        <el-button 
+          type="primary" 
+          @click="downloadNotice" 
+          :loading="loading"
+        >
+          {{ loading ? '下发中...' : '下发' }}
+        </el-button>
       </div>
     </div>
   </div>
@@ -243,6 +249,7 @@ import { ElMessage } from "element-plus";
 import type { FormInstance } from "element-plus";
 import request from "@/utils/request";
 import SlidingPanel from '@/components/SlidingPanel.vue'; // 请确保路径正确
+import { debounce } from 'lodash-es';
 
 const router = useRouter();
 const route = useRoute();
@@ -333,7 +340,9 @@ const goBack = () => {
   router.go(-1);
 };
 
-const downloadNotice = async () => {
+const loading = ref(false);
+
+const downloadNotice = debounce(async () => {
   if (!noticeFormRef.value) return;
   
   await noticeFormRef.value.validate(async (valid, fields) => {
@@ -349,6 +358,7 @@ const downloadNotice = async () => {
         return;
       }
 
+      loading.value = true; // 开始加载
       try {
         const formData = new FormData();
         formData.append('order_id', route.params.orderId as string);
@@ -390,7 +400,6 @@ const downloadNotice = async () => {
         
         if (response.code === 1) {
           ElMessage.success("下发成功");
-          // router.go(-1);
           setTimeout(() => {
             router.push('/qc-list');
           }, 1000);
@@ -399,14 +408,15 @@ const downloadNotice = async () => {
         }
       } catch (error) {
         console.error("Error downloading notice:", error);
-        // ElMessage.error("下发失败");
+        ElMessage.error("下发失败");
+      } finally {
+        loading.value = false; // 结束加载
       }
     } else {
       console.log('Validation failed:', fields);
-      // ElMessage.error("表单验证失败，请检查输入");
     }
   });
-};
+}, 500, { leading: true, trailing: false }); // 500ms 延迟，只执行第一次点击
 
 const dynamicOptions = ref<string[]>([]);
 const customOption = ref('');

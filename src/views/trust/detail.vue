@@ -8,8 +8,8 @@
             <el-button @click="goBack">返回</el-button>
             <!-- <el-button @click="printDetail">打印</el-button> -->
             <el-button @click="downloadDetail">下载</el-button>
-            <el-button @click="deleteDetail">删除</el-button>
-            <el-button @click="editDetail">编辑</el-button>
+            <el-button @click="deleteDetail"    v-if="trustDetail.status === '-1' || trustDetail.status === '3'">删除</el-button>
+            <el-button @click="editDetail"    v-if="trustDetail.status === '-1' || trustDetail.status === '3'">编辑</el-button>
             <el-button type="primary" @click="openReviewDialog" :disabled="trustDetail.status === '2'">
               {{ trustDetail.status === '2' ? '已审核' : '审核' }}
             </el-button>
@@ -152,6 +152,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import ReviewDialog from "@/components/ReviewDialog.vue";
 import PointPage from './PointPage.vue';
+import { ElMessage, ElMessageBox } from "element-plus";
 
 const router = useRouter();
 const route = useRoute();
@@ -236,12 +237,42 @@ const downloadDetail = async () => {
   }
 };
 
-const deleteDetail = () => {
+const deleteDetail = async () => {
   // 实现删除功能
+  try {
+    await ElMessageBox.confirm('确定要删除该委托单吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    // const id = route.params.id;
+    const formData = new FormData()
+    formData.append('order_id', route.params.id as string)
+
+    const response: any = await request({
+      url: 'lipu/flow/order/del_order',
+      method: 'POST',
+      data: formData
+    })
+
+    if (response.code === 1) {
+      ElMessage.success('删除成功')
+      // 直接调用 CommonList 组件的 loadData 方法
+      router.push(`/trust-list`)
+    } else {
+      ElMessage.error(response.msg || '删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除失败:', error)
+      ElMessage.error('删除失败')
+    }
+  }
 };
 
 const editDetail = () => {
   // 实现编辑功能
+  router.push(`/trust-edit/${route.params.id}`);
 };
 
 const openReviewDialog = () => {
