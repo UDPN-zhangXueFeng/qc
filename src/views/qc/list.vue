@@ -1,5 +1,6 @@
 <template>
   <CommonList
+  ref="commonListRef"
     :searchTitle="'质控单搜索'"
     :listTitle="'质控单列表'"
     :searchFields="searchFields"
@@ -30,6 +31,7 @@ import * as XLSX from "xlsx";
 
 const router = useRouter();
 const route = useRoute();
+const commonListRef = ref();
 const defaultOrderId = ref((route.params.id as string) || "");
 
 const searchFields = computed(() => [
@@ -120,10 +122,11 @@ const handleDelete = async (row: any) => {
 
     if (response.code === 1) {
       ElMessage.success('删除成功')
+      commonListRef.value?.loadData()
       // 重新加载列表数据
-      setTimeout(() => {
-        location.reload()
-      }, 1000)
+      // setTimeout(() => {
+      //   location.reload()
+      // }, 1000)
     } else {
       // ElMessage.error(response.msg || '删除失败')
     }

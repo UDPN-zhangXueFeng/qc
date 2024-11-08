@@ -1,5 +1,5 @@
 <template>
-  <CommonList :searchTitle="'任务搜索'" :listTitle="'任务列表'" :searchFields="searchFields" :tableColumns="tableColumns"
+  <CommonList ref="commonListRef" :searchTitle="'任务搜索'" :listTitle="'任务列表'" :searchFields="searchFields" :tableColumns="tableColumns"
     :headerActions="headerActions" :rowActions="rowActions" :fetchData="fetchData" @reset="handleReset">
     <!-- 自定义状态列的插槽 -->
     <!-- // 1=待接收,2=已接收,3=已拒绝,4=已取消,5=已完成 -->
@@ -20,7 +20,7 @@ import request from '@/utils/request'
 import * as XLSX from 'xlsx';
 
 const router = useRouter();
-
+const commonListRef = ref();
 const route = useRoute()
 const defaultOrderId = ref(route.params.id as string || '')
 
@@ -157,11 +157,12 @@ const handleDelete = async (row: any) => {
         type: 'success',
         message: '删除成功'
       })
+      commonListRef.value?.loadData()
       // 重新加载列表数据
       // await fetchData({})
-      setTimeout(() => {
-        location.reload()
-      }, 1000)
+      // setTimeout(() => {
+      //   location.reload()
+      // }, 1000)
     } else {
       throw new Error(response.data.msg || '删除失败')
     }
@@ -295,7 +296,7 @@ const handleCancel = async (row: any) => {
       }
     )
     
-    const response = await request({
+    const response:any = await request({
       url: '/lipu/flow/task/cancel_task',
       method: 'post',
       data: {

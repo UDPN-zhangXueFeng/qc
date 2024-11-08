@@ -1,5 +1,5 @@
 <template>
-  <div class="trust-form max-w-5xl mx-auto">
+  <div class="trust-form mx-auto">
     <el-steps :active="2" finish-status="success" simple class="mb-8">
       <el-step title="填写基本信息" />
       <el-step title="添加技术方案" />
@@ -44,7 +44,8 @@
     </el-card>
 
     <div class="fixed bottom-0 left-0 right-0 bg-white shadow-md z-10">
-      <div class="max-w-5xl mx-auto py-4 px-6 flex justify-end space-x-4">
+      <div class=" mx-auto py-4 px-6 flex justify-end space-x-4">
+        <el-button @click="backStepOne">返回上一步</el-button>
         <el-button @click="cancel">取消</el-button>
         <el-button @click="saveAsDraft">保存为草稿</el-button>
         <!-- <el-button @click="saveAndCopy">提交并复制新增</el-button> -->
@@ -218,7 +219,7 @@ const saveAsDraft = async () => {
       // ElMessage.error(response.msg || '保存失败');
     }
   } catch (error) {
-    console.error('保存草稿失败:', error);
+    console.error('保存草��失败:', error);
     // ElMessage.error('保存草稿失败');
   }
 };
@@ -229,6 +230,9 @@ const saveAndCopy = () => {
 };
 
 const nextStep = () => {
+  // localStorage.setItem("draft", JSON.stringify(tableData.value));
+  localStorage.removeItem("draft");
+  localStorage.removeItem("order_id");
   router.push("/trust-add-three");
 };
 
@@ -310,6 +314,10 @@ const fetchTableData = async () => {
     console.error("Error fetching table data:", error);
     ElMessage.error("获取表格数据失败");
   }
+};
+
+const backStepOne = () => {
+  router.push("/trust-add-one");
 };
 
 onMounted(() => {

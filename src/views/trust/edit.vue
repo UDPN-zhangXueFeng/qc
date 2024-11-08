@@ -59,7 +59,7 @@
                 </el-form-item>
 
                 <el-form-item label="完成时间" prop="completionTime" required>
-                    <el-date-picker v-model="form.completionTime" type="date" placeholder="请选择" />
+                    <el-date-picker v-model="form.completionTime" type="date" placeholder="��选择" />
                 </el-form-item>
 
                 <el-form-item label="受托时间">
@@ -122,6 +122,7 @@
         <div class="fixed-bottom">
             <div class="button-container">
                 <el-button @click="cancel">取消</el-button>
+                <el-button @click="saveAsDraft">保存为草稿</el-button>
                 <el-button type="primary" @click="submitForm">下一步</el-button>
             </div>
         </div>
@@ -186,6 +187,75 @@ const rules = {
             trigger: "blur",
         },
     ],
+};
+const saveAsDraft = async () => {
+  if (!formRef.value) return;
+  formRef.value.validate(async (valid: boolean) => {
+    if (valid) {
+      console.log("表单验证通过");
+
+      console.log(form);
+      // 创建一个新对象，包含 form 中的所有属性
+      // const formData = { ...form };
+      try {
+        // 从 localStorage 获取第一步保存的数据
+        // const draftData = JSON.parse(localStorage.getItem('draft') || '{}');
+
+        // 构建请求数据
+        const formData = new FormData();
+
+        // 添加第一步的表单数据
+        // Object.entries(form).forEach(([key, value]) => {
+        //   formData.append(key, value);
+        // });
+        formData.append('order_number', form.trustNumber);
+        formData.append('project_name', form.projectName);
+        formData.append('tested_company_name', form.unitName);
+        formData.append('sampling_or_delivery', form.sampleType === "sampling" ? "采样" : "送样");
+        formData.append('sampling_address', form.sampleAddress);
+        formData.append('delivery_sample_time', formatDate(form.entrustmentTime));
+        formData.append('is_subcontract', form.isSubcontract ? "是" : "否");
+        formData.append('test_category', form.testType || form.otherTestType);
+        formData.append('deadline', formatDate(form.completionTime));
+        formData.append('project_note', form.projectNote);
+        formData.append('client_company_name', form.clientCompany);
+        formData.append('client_company_address', form.clientAddress);
+        formData.append('client_contact_person', form.clientContact);
+        formData.append('client_contact_tel', form.clientPhone);
+        formData.append('client_email', form.clientEmail);
+        formData.append('handled_by', form.handlerName);
+        formData.append('handled_by_tel', form.handlerPhone);
+        // 添加当前页面的技术方案数据
+        // formData.append('test_params', JSON.stringify(tableData.value));
+        console.log("formData", formData);
+        // 发送保存草稿请求
+        const response:any = await request({
+          url: '/lipu/flow/order/order_add_cg',
+          method: 'POST',
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        if (response.code === 1) {
+          ElMessage.success('草稿保存成功');
+          setTimeout(() => {
+            router.push('/trust-list');
+          }, 1000);
+        } else {
+          // ElMessage.error(response.msg || '保存失败');
+        }
+      } catch (error) {
+        console.error('保存草稿失败:', error);
+        // ElMessage.error('保存草稿失败');
+      }
+    } else {
+      console.log("表单验证失败");
+      return;
+    }
+  });
+
 };
 
 // 获取委托单详情
@@ -276,7 +346,7 @@ const submitForm = () => {
 };
 
 const cancel = () => {
-    router.go(-1); 
+    router.push(`/trust-list`);
     return;
     ElMessageBox.confirm("确定要取消编辑吗？未保存的修改将会丢失。", "提示", {
         confirmButtonText: "确定",

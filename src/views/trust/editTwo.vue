@@ -1,5 +1,5 @@
 <template>
-  <div class="trust-form max-w-5xl mx-auto">
+  <div class="trust-form mx-auto">
     <el-card class="mb-4 mt-4">
       <template #header>
         <div class="flex justify-between items-center">
@@ -36,7 +36,8 @@
     </el-card>
 
     <div class="fixed bottom-0 left-0 right-0 bg-white shadow-md z-10">
-      <div class="max-w-5xl mx-auto py-4 px-6 flex justify-end space-x-4">
+      <div class=" mx-auto py-4 px-6 flex justify-end space-x-4">
+        <el-button @click="backStepOne">返回上一步</el-button>
         <el-button @click="cancel">取消</el-button>
         <el-button type="primary" @click="save">保存</el-button>
       </div>
@@ -93,6 +94,10 @@ const downloadTemplate = async () => {
     console.error('下载模板失败:', error);
     ElMessage.error('下载模板失败');
   }
+};
+
+const backStepOne = () => {
+  router.push(`/trust-edit/${route.params.id}`);
 };
 
 const deleteRow = (index: number) => {
