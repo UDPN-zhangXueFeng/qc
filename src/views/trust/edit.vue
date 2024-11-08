@@ -213,8 +213,9 @@ const saveAsDraft = async () => {
         formData.append('tested_company_name', form.unitName);
         formData.append('sampling_or_delivery', form.sampleType === "sampling" ? "采样" : "送样");
         formData.append('sampling_address', form.sampleAddress);
-        formData.append('delivery_sample_time', formatDate(form.entrustmentTime));
+        formData.append('delivery_sample_time', formatDate(form.deliveryTime));
         formData.append('is_subcontract', form.isSubcontract ? "是" : "否");
+        formData.append('wttime', formatDate(form.entrustmentTime));
         formData.append('test_category', form.testType || form.otherTestType);
         formData.append('deadline', formatDate(form.completionTime));
         formData.append('project_note', form.projectNote);
@@ -279,7 +280,7 @@ const fetchOrderDetail = async (orderId: string) => {
             form.isSubcontract = data.is_subcontract === '是';
             form.testType = data.test_category;
             form.completionTime = data.deadline;
-            form.entrustmentTime = data.createtime;
+            form.entrustmentTime = data.wttime;
             form.projectNote = data.project_note;
             form.clientCompany = data.client_company_name;
             form.clientAddress = data.client_company_address;

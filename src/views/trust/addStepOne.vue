@@ -266,7 +266,8 @@ const saveAsDraft = async () => {
         formData.append('tested_company_name', form.unitName);
         formData.append('sampling_or_delivery', form.sampleType === "sampling" ? "采样" : "送样");
         formData.append('sampling_address', form.sampleAddress);
-        formData.append('delivery_sample_time', formatDate(form.entrustmentTime));
+        formData.append('delivery_sample_time', formatDate(form.deliveryTime));
+        formData.append('wttime', formatDate(form.entrustmentTime));
         formData.append('is_subcontract', form.isSubcontract ? "是" : "否");
         formData.append('test_category', form.testType || form.otherTestType);
         formData.append('deadline', formatDate(form.completionTime));
