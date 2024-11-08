@@ -10,7 +10,9 @@
             <el-button @click="downloadDetail">下载</el-button>
             <el-button @click="deleteDetail">删除</el-button>
             <el-button @click="editDetail">编辑</el-button>
-            <el-button type="primary" @click="openReviewDialog">审核</el-button>
+            <el-button type="primary" @click="openReviewDialog" :disabled="trustDetail.status === '2'">
+              {{ trustDetail.status === '2' ? '已审核' : '审核' }}
+            </el-button>
           </div>
         </div>
       </template>
@@ -155,8 +157,28 @@ const router = useRouter();
 const route = useRoute();
 const activeTab = ref('details');  // 新增 tab 控制变量
 
+interface TrustDetail {
+  id: string;
+  order_number: string;
+  project_name: string;
+  sampling_address: string;
+  is_subcontract: string;
+  test_category: string;
+  deadline: string;
+  createtime: string;
+  createdby: string;
+  status: string;
+  project_note: string;
+  client_company_name: string;
+  client_company_address: string;
+  client_contact_person: string;
+  client_contact_tel: string;
+  client_email: string;
+  handled_by: string;
+  handled_by_tel: string;
+}
 
-const trustDetail = ref(null);
+const trustDetail = ref<TrustDetail | null>(null);
 const showClientInfo = ref(true);
 const testParams = ref([]);
 const reviewDialogRef = ref(null);

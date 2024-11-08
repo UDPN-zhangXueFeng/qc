@@ -200,16 +200,16 @@ const rowActions = computed(() => (row: any) => {
   
   switch (row.status) {
     case '1': // 待接收
-      actions.push(
-        // { name: 'supplement', label: '补充', handler: handleSupplement },
-        // { name: 'reassign', label: '重新指派', handler: handleReassign },
-        // { name: 'cancel', label: '取消分派', handler: handleCancel }
-      )
+      // actions.push(
+      //   { name: 'supplement', label: '补充', handler: handleSupplement },
+      //   { name: 'reassign', label: '重新指派', handler: handleReassign },
+      //   { name: 'cancel', label: '取消分派', handler: handleCancel }
+      // )
       break
     case '2': // 已接收
-      // actions.push(
-      //   { name: 'reassign', label: '重新指派', handler: handleReassign }
-      // )
+      actions.push(
+        { name: 'reassign', label: '重新指派', handler: handleEdit }
+      )
       break
     case '3': // 拒收
       actions.push(
