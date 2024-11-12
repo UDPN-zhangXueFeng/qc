@@ -175,8 +175,39 @@ const form = reactive({
   handlerPhone: "",
 });
 
+const checkTrustNumberUnique = async (rule, value, callback) => {
+  if (!value) {
+    callback(new Error('请输入委托单号'));
+    return;
+  }
+  try {
+    const response = await request({
+      url: '/lipu/flow/order/has_order',
+      method: 'GET',
+      params: { type: 'order', sn: value }
+    });
+    
+    if (response.code === 0) {
+      // if (response.data.exists) {
+        callback(new Error('委托单号已存在'));
+      // } else {
+        // callback();
+      // }
+    } else {
+      // callback(new Error(response.msg || '验证失败'));
+      callback();
+    }
+  } catch (error) {
+    console.error('检查委托单号失败:', error);
+    callback(new Error('验证失败，请重试'));
+  }
+};
+
 const rules = {
-  trustNumber: [{ required: true, message: "请输入委托单号", trigger: "blur" }],
+  trustNumber: [
+    { required: true, message: "请输入委托单号", trigger: "blur" },
+    { validator: checkTrustNumberUnique, trigger: "blur" }
+  ],
   projectType: [
     { required: true, message: "请选择项目类型", trigger: "change" },
   ],
@@ -221,7 +252,7 @@ const cancel = () => {
   // 使用 ElMessageBox 来确认用户是否真的要取消
   ElMessageBox.confirm("确定要取消吗？未保存的内容将会丢失。", "提示", {
     confirmButtonText: "确定",
-    cancelButtonText: "取��",
+    cancelButtonText: "取",
     type: "warning",
   })
     .then(() => {

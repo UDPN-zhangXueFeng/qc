@@ -350,6 +350,8 @@ const handleFileUpload = async (event: Event) => {
     if (response?.code === 1) {
       localStorage.setItem("order_id", response.data.order_id);
       upFiles(response.data.order_id, event);
+    } else {
+      ElMessage.error(response.msg || '上传失败');
     }
   }
 
