@@ -72,11 +72,9 @@ const searchFields = computed(() => [
 ]);
 
 const tableColumns = [
-  { prop: "task_number", label: "质控通知单号", width: "250" },
+  { prop: "qc_number", label: "质控通知单号", width: "250" },
   { prop: "order_number", label: "关联委托单号", width: "250" },
-  { prop: "qc_number", label: "关联任务单号", width: "250", formatter: (row: any) => {
-    return row.order_number === null ? "--" : row.order_number.split('-')[0]
-  } },
+  { prop: "task_number", label: "关联任务单号", width: "250" },
   { prop: "task_related_office", label: "有关科室", width: "120" },
   { prop: "status_text", label: "状态", slot: "status", width: "100" },
   { prop: "createdby", label: "制单人", width: "120" },
