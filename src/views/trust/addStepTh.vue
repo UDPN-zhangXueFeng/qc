@@ -24,10 +24,10 @@
   
   <script setup lang="ts">
   import { CircleCheckFilled } from '@element-plus/icons-vue'
-  import { useRouter } from 'vue-router'
+  import { useRouter,useRoute } from 'vue-router'
   
   const router = useRouter()
-  
+  const route = useRoute()
   const backToList = () => {
     // 实现返回委托单列表的逻辑
     router.push('/trust-list') // 假设列表页面的路由是 '/trust-list'
@@ -35,7 +35,7 @@
   
   const viewDetails = () => {
     // 实现查看详情的逻辑
-    const id = localStorage.getItem('order_id')
+    const id = route.params.id
     router.push(`/trust-detail/${id}`) // 假设详情页面的路由是 '/trust-details'
   }
   </script>

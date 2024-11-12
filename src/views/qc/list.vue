@@ -15,7 +15,7 @@
     <!-- // 1=待下发,2=已下发,3=已取消  -->
     <template #status="{ row }">
       <el-tag :type="getStatusType(row.status)">{{
-        row.status === '1' ? '待下发' : row.status === '2' ? '已下发' : row.status === '3' ? '已取消' : '--'
+        row.status === 1 ? '待下发' : row.status === 2 ? '已下发' : row.status === 3 ? '已取消' : '--'
       }}</el-tag>
     </template>
   </CommonList>
@@ -74,7 +74,9 @@ const searchFields = computed(() => [
 const tableColumns = [
   { prop: "task_number", label: "质控通知单号", width: "250" },
   { prop: "order_number", label: "关联委托单号", width: "250" },
-  { prop: "qc_number", label: "关联任务单号", width: "250" },
+  { prop: "qc_number", label: "关联任务单号", width: "250", formatter: (row: any) => {
+    return row.order_number === null ? "--" : row.order_number.split('-')[0]
+  } },
   { prop: "task_related_office", label: "有关科室", width: "120" },
   { prop: "status_text", label: "状态", slot: "status", width: "100" },
   { prop: "createdby", label: "制单人", width: "120" },
@@ -145,10 +147,11 @@ const headerActions = [
 const rowActions = computed(() => (row: any) => {
   const actions = [
     { name: "view", label: "查看详情", handler: handleView },
+    // { name: "edit", label: "编辑", handler: handleEdit },
   ];
 
   // 只有待下发状态(status=1)可以编辑和删除
-  if (row.status === '1') {
+  if (row.status === 1) {
     actions.push(
       { name: "edit", label: "编辑", handler: handleEdit },
       { name: "delete", label: "删除", handler: handleDelete }
@@ -194,9 +197,9 @@ const fetchData = async (params: any) => {
 
 const getStatusType = (status: any) => {
   const statusMap: Record<string, string> = {
-    '1': "warning",
-    '2': "success",
-    '3': "info",
+    1: "warning",
+    2: "success",
+    3: "info",
   };
   return statusMap[status] || "default";
 };

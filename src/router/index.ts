@@ -57,17 +57,17 @@ const router = createRouter({
       component: TrustList,
     },
     {
-      path: "/trust-add-one",
+      path: "/trust-add-one/:id?",
       name: "TrustAddOne",
       component: TrustAddOne,
     },
     {
-      path: "/trust-add-two",
+      path: "/trust-add-two/:id?",
       name: "TrustAddTwo",
       component: TrustAddTwo,
     },
     {
-      path: "/trust-add-three",
+      path: "/trust-add-three/:id?",
       name: "TrustAddThree",
       component: TrustAddThree,
     },

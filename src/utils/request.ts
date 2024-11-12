@@ -41,8 +41,9 @@ service.interceptors.response.use(
     const res = response.data;
     if (Number(res.code) !== 1) {
       // 处理错误情况
-      console.error("Response error:", res.message);
-      return Promise.reject(new Error(res.message || "Error"));
+      // console.error("Response error:", res.msg);
+      // return Promise.reject(new Error(res.msg || "Error"));
+      return res;
     } else {
       return res;
     }

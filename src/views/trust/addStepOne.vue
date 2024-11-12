@@ -144,11 +144,12 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { useRouter } from "vue-router"; // 导入 useRouter
+import { useRouter, useRoute } from "vue-router"; // 导入 useRouter
 import request from "@/utils/request"; // 确保路径正确
 import { formatDate } from "@/utils/dateUtils";
 
 const router = useRouter(); // 获取 router 实例
+const route = useRoute();
 const formRef = ref(null);
 
 const form = reactive({
@@ -235,32 +236,13 @@ const cancel = () => {
     });
 };
 
-const saveAsDraft1 = () => {
-  // 实现保存为草稿的逻辑
-  console.log("保存为草稿");
-  localStorage.setItem("draft", JSON.stringify(form));
-  ElMessage.success("已保存为草稿");
-};
 
 const saveAsDraft = async () => {
   formRef.value.validate(async (valid) => {
     if (valid) {
-      console.log("表单验证通过");
-
-      console.log(form);
-      // 创建一个新对象，包含 form 中的所有属性
-      // const formData = { ...form };
       try {
-        // 从 localStorage 获取第一步保存的数据
-        // const draftData = JSON.parse(localStorage.getItem('draft') || '{}');
-
         // 构建请求数据
         const formData = new FormData();
-
-        // 添加第一步的表单数据
-        // Object.entries(form).forEach(([key, value]) => {
-        //   formData.append(key, value);
-        // });
         formData.append('order_number', form.trustNumber);
         formData.append('project_name', form.projectName);
         formData.append('tested_company_name', form.unitName);
@@ -279,9 +261,6 @@ const saveAsDraft = async () => {
         formData.append('client_email', form.clientEmail);
         formData.append('handled_by', form.handlerName);
         formData.append('handled_by_tel', form.handlerPhone);
-        // 添加当前页面的技术方案数据
-        // formData.append('test_params', JSON.stringify(tableData.value));
-        console.log("formData", formData);
         // 发送保存草稿请求
         const response = await request({
           url: '/lipu/flow/order/order_add_cg',
@@ -298,7 +277,8 @@ const saveAsDraft = async () => {
             router.push('/trust-list');
           }, 1000);
         } else {
-          // ElMessage.error(response.msg || '保存失败');
+          // console.log(response.msg);
+          ElMessage.error(response.msg || '保存失败');
         }
       } catch (error) {
         console.error('保存草稿失败:', error);
@@ -314,161 +294,106 @@ const saveAsDraft = async () => {
 };
 
 const submitForm = () => {
-  // 首先检查是否存在 order_id
-  const existingOrderId = localStorage.getItem("order_id");
-  if (existingOrderId) {
-    formRef.value.validate((valid) => {
-      if (valid) {
-        console.log("表单验证通过");
-        const formData = { ...form };
-        const params = {
-          order_number: formData.trustNumber,
-          project_name: formData.projectName,
-          tested_company_name: formData.unitName,
-          sampling_or_delivery: formData.sampleType === "sampling" ? "采样" : "送样",
-          sampling_address: formData.sampleAddress,
-          delivery_sample_time: formatDate(formData.entrustmentTime),
-          is_subcontract: formData.isSubcontract ? "是" : "否",
-          test_category: formData.testType || formData.otherTestType,
-          deadline: formatDate(formData.completionTime),
-          project_note: formData.projectNote,
-          client_company_name: formData.clientCompany,
-          client_company_address: formData.clientAddress,
-          client_contact_person: formData.clientContact,
-          client_contact_tel: formData.clientPhone,
-          client_email: formData.clientEmail,
-          handled_by: formData.handlerName,
-          handled_by_tel: formData.handlerPhone,
-        };
-        localStorage.setItem("draft", JSON.stringify(params));
-        router.push("/trust-add-two");
-      } else {
-        console.log("表单验证失败");
-        return false;
-      }
-    });
-
-    // // 如果存在，询问用户是否继续编辑上次未完成的委托
-    // ElMessageBox.confirm(
-    //   "检测到上次未完成的委托，是否继续添加？",
-    //   "提示",
-    //   {
-    //     confirmButtonText: "继续编辑",
-    //     cancelButtonText: "创建新委托",
-    //     type: "warning",
-    //   }
-    // )
-    //   .then(() => {
-    //     // 用户选择继续编辑，直接跳转
-    //     router.push("/trust-add-two");
-    //   })
-    //   .catch(() => {
-    //     // 用户选择创建新委托，清除旧的 order_id 并继续表单验证流程
-    //     localStorage.removeItem("order_id");
-    //     validateAndSubmit();
-    //   });
-  } else {
-    // 如果不存在 order_id，直接进行表单验证
-    validateAndSubmit();
-  }
-};
-
-// 将原来的表单验证逻辑抽取为单独的函数
-const validateAndSubmit = () => {
   formRef.value.validate((valid) => {
     if (valid) {
       console.log("表单验证通过");
       const formData = { ...form };
-      sendDataToServer(formData);
+      const params = {
+        order_number: formData.trustNumber,
+        project_name: formData.projectName,
+        tested_company_name: formData.unitName,
+        sampling_or_delivery: formData.sampleType === "sampling" ? "采样" : "送样",
+        sampling_address: formData.sampleAddress,
+        delivery_sample_time: formatDate(formData.deliveryTime),
+        wttime: formatDate(formData.entrustmentTime),
+        is_subcontract: formData.isSubcontract ? "是" : "否",
+        test_category: formData.testType || formData.otherTestType,
+        deadline: formatDate(formData.completionTime),
+        project_note: formData.projectNote,
+        client_company_name: formData.clientCompany,
+        client_company_address: formData.clientAddress,
+        client_contact_person: formData.clientContact,
+        client_contact_tel: formData.clientPhone,
+        client_email: formData.clientEmail,
+        handled_by: formData.handlerName,
+        handled_by_tel: formData.handlerPhone,
+      };
+      localStorage.setItem("draft", JSON.stringify(params));
+      const id = route.params.id;
+      router.push(`/trust-add-two${id ? `/${id}` : ''}`);
     } else {
       console.log("表单验证失败");
       return false;
     }
   });
+
+
 };
 
-const sendDataToServer = async (data) => {
 
+const fetchOrderDetail = async (orderId) => {
   try {
-    // const result = await ElMessageBox.confirm("确定要提交吗？", "提示", {
-    //   confirmButtonText: "确定",
-    //   cancelButtonText: "取消",
-    //   type: "warning",
-    // });
+    const response = await request({
+      url: `lipu/flow/order/get_single_order`,
+      method: "GET",
+      params: { order_id: orderId }
+    });
 
-    const params = {
-      order_number: data.trustNumber,
-      project_name: data.projectName,
-      tested_company_name: data.unitName,
-      sampling_or_delivery: data.sampleType === "sampling" ? "采样" : "送样",
-      sampling_address: data.sampleAddress,
-      delivery_sample_time: formatDate(data.entrustmentTime),
-      is_subcontract: data.isSubcontract ? "是" : "否",
-      test_category: data.testType || data.otherTestType,
-      deadline: formatDate(data.completionTime),
-      project_note: data.projectNote,
-      client_company_name: data.clientCompany,
-      client_company_address: data.clientAddress,
-      client_contact_person: data.clientContact,
-      client_contact_tel: data.clientPhone,
-      client_email: data.clientEmail,
-      handled_by: data.handlerName,
-      handled_by_tel: data.handlerPhone,
-    };
-    localStorage.setItem("draft", JSON.stringify(params));
-    // console.log("params", params);
-    // return;
-    const response = await request.post("lipu/flow/order/order_add", params);
-
-    console.log("数据发送成功：", response);
-    if (response?.code === 1) {
-      // 暂时保存
-      localStorage.setItem("order_id", response.data.order_id);
-      // ElMessage.success("数据提交成功");
-      router.push("/trust-add-two");
-    } else {
-      ElMessage.error("数据提交失败");
+    if (response.code === 1) {
+      const data = response.data.order;
+      form.trustNumber = data.order_number;
+      form.projectName = data.project_name;
+      form.projectType = data.project_name ? 'project' : 'unit';
+      form.unitName = data.tested_company_name;
+      form.sampleType = data.sampling_or_delivery === '采样' ? 'sampling' : 'delivery';
+      form.sampleAddress = data.sampling_address;
+      form.deliveryTime = data.delivery_sample_time;
+      form.isSubcontract = data.is_subcontract === '是';
+      form.testType = data.test_category;
+      form.completionTime = data.deadline;
+      form.entrustmentTime = data.wttime;
+      form.projectNote = data.project_note;
+      form.clientCompany = data.client_company_name;
+      form.clientAddress = data.client_company_address;
+      form.clientContact = data.client_contact_person;
+      form.clientPhone = data.client_contact_tel;
+      form.clientEmail = data.client_email;
+      form.handlerName = data.handled_by;
+      form.handlerPhone = data.handled_by_tel;
     }
-
   } catch (error) {
-    if (error !== "cancel") {
-      console.error("发送数据时出错：", error);
-      ElMessage.error("发送数据时出错");
-    }
+    console.error("获取委托单详情失败:", error);
   }
 };
-
 onMounted(() => {
-  // 检查是否存在草稿数据
-  const draftData = localStorage.getItem('draft');
-  if (draftData) {
-    try {
-      const parsedData = JSON.parse(draftData);
-
-      // 将草稿数据映射回表单
-      form.trustNumber = parsedData.order_number || '';
-      form.projectName = parsedData.project_name || '';
-      form.unitName = parsedData.tested_company_name || '';
-      form.sampleType = parsedData.sampling_or_delivery === "采样" ? "sampling" : "delivery";
-      form.sampleAddress = parsedData.sampling_address || '';
-      form.entrustmentTime = parsedData.delivery_sample_time ? new Date(parsedData.delivery_sample_time) : new Date();
-      form.isSubcontract = parsedData.is_subcontract === "是";
-      form.testType = parsedData.test_category || "采样检测";
-      form.completionTime = parsedData.deadline ? new Date(parsedData.deadline) : new Date();
-      form.projectNote = parsedData.project_note || '';
-      form.clientCompany = parsedData.client_company_name || '';
-      form.clientAddress = parsedData.client_company_address || '';
-      form.clientContact = parsedData.client_contact_person || '';
-      form.clientPhone = parsedData.client_contact_tel || '';
-      form.clientEmail = parsedData.client_email || '';
-      form.handlerName = parsedData.handled_by || '';
-      form.handlerPhone = parsedData.handled_by_tel || '';
-
-      // ElMessage.info('已加载草稿数据');
-    } catch (error) {
-      console.error('解析草稿数据失败:', error);
-      localStorage.removeItem('draft');
+  // 检查是否是带id
+  const id = route.params.id;
+  if (id) {
+    fetchOrderDetail(id);
+  } else {
+    const draftData = JSON.parse(localStorage.getItem('draft') || '{}');
+    if (Object.keys(draftData).length > 0) {
+      form.trustNumber = draftData.order_number;
+      form.projectName = draftData.project_name;
+      form.projectType = draftData.project_name ? 'project' : 'unit';
+      form.unitName = draftData.tested_company_name;
+      form.sampleType = draftData.sampling_or_delivery === '采样' ? 'sampling' : 'delivery';
+      form.sampleAddress = draftData.sampling_address;
+      form.deliveryTime = draftData.delivery_sample_time;
+      form.isSubcontract = draftData.is_subcontract === '是';
+      form.testType = draftData.test_category;
+      form.completionTime = draftData.deadline;
+      form.entrustmentTime = draftData.wttime;
+      form.projectNote = draftData.project_note;
+      form.clientCompany = draftData.client_company_name;
+      form.clientAddress = draftData.client_company_address;
+      form.clientContact = draftData.client_contact_person;
+      form.clientPhone = draftData.client_contact_tel;
+      form.clientEmail = draftData.client_email;
+      form.handlerName = draftData.handled_by;
+      form.handlerPhone = draftData.handled_by_tel;
     }
+
   }
 });
 </script>

@@ -58,8 +58,9 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import request from "@/utils/request";
+
 
 interface TableRow {
   id: number;
@@ -78,6 +79,7 @@ interface TableRow {
 }
 
 const router = useRouter();
+const route = useRoute();
 const tableData = ref<TableRow[]>([]);
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -216,7 +218,7 @@ const saveAsDraft = async () => {
       ElMessage.success('草稿保存成功');
       router.push('/trust-list');
     } else {
-      // ElMessage.error(response.msg || '保存失败');
+      ElMessage.error(response.msg || '保存失败');
     }
   } catch (error) {
     console.error('保存草��失败:', error);
@@ -229,18 +231,44 @@ const saveAndCopy = () => {
   ElMessage.success("已提交并复制新增");
 };
 
-const nextStep = () => {
-  // localStorage.setItem("draft", JSON.stringify(tableData.value));
-  localStorage.removeItem("draft");
-  localStorage.removeItem("order_id");
-  router.push("/trust-add-three");
+const nextStep = async () => {
+  const id = route.params.id;
+  const draftData = JSON.parse(localStorage.getItem('draft') || '{}');
+  if (id) {
+    // 构建请求数据
+    const formData = new FormData();
+    // 添加第一步的表单数据
+    Object.entries(draftData).forEach(([key, value]) => {
+      formData.append(key, value as string);
+    });
+    formData.append('order_id', route.params.id as string);
+    await request.post("lipu/flow/order/edit_order", formData);
+    localStorage.removeItem("draft");
+    router.push(`/trust-add-three/${id}`);
+
+  } else {
+    if (tableData.value.length <= 0) {
+      // 构建请求数据
+      const formData = new FormData();
+      // 添加第一步的表单数据
+      Object.entries(draftData).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+      const response: any = await request.post("lipu/flow/order/order_add", draftData);
+      localStorage.removeItem("draft");
+      router.push(`/trust-add-three/${response.data.order_id}`);
+    } else {
+      localStorage.removeItem("draft");
+      router.push(`/trust-add-three/${localStorage.getItem("order_id")}`);
+    }
+  }
+
 };
 
 const openFileUpload = () => {
   fileInput.value?.click();
 };
-
-const handleFileUpload = async (event: Event) => {
+const upFiles = async (id: string, event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
 
@@ -268,7 +296,7 @@ const handleFileUpload = async (event: Event) => {
 
       // 第二步：调用导入接口
       const importFormData = new FormData();
-      importFormData.append('order_id', localStorage.getItem('order_id') || '');
+      importFormData.append('order_id', id);
       importFormData.append('file_path', filePath);
 
       const importResponse: any = await request({
@@ -280,7 +308,7 @@ const handleFileUpload = async (event: Event) => {
       if (importResponse.code === 1) {
         ElMessage.success("文件导入成功");
         // 导入成功后，调用接口获取最新的表格数据
-        await fetchTableData();
+        await fetchTableData(id);
       } else {
         ElMessage.error(importResponse.msg || "导入失败");
       }
@@ -296,32 +324,62 @@ const handleFileUpload = async (event: Event) => {
   if (fileInput.value) {
     fileInput.value.value = '';
   }
+}
+
+const handleFileUpload = async (event: Event) => {
+  const or_id = route.params.id;
+  const draftData = JSON.parse(localStorage.getItem('draft') || '{}');
+  if (or_id) {
+    // 构建请求数据
+    const formData = new FormData();
+    // 添加第一步的表单数据
+    Object.entries(draftData).forEach(([key, value]) => {
+      formData.append(key, value as string);
+    });
+    formData.append('order_id', route.params.id as string);
+    await request.post("lipu/flow/order/edit_order", formData);
+    upFiles(or_id as string, event);
+  } else {
+    // 构建请求数据
+    const formData = new FormData();
+    // 添加第一步的表单数据
+    Object.entries(draftData).forEach(([key, value]) => {
+      formData.append(key, value as string);
+    });
+    const response: any = await request.post("lipu/flow/order/order_add", draftData);
+    if (response?.code === 1) {
+      localStorage.setItem("order_id", response.data.order_id);
+      upFiles(response.data.order_id, event);
+    }
+  }
+
 };
 
-const fetchTableData = async () => {
+const fetchTableData = async (id?: string) => {
   try {
     const response: any = await request({
       method: 'GET',
-      url: `/lipu/flow/order/import_test_params?order_id=${localStorage.getItem('order_id') || ''}`,
+      url: `/lipu/flow/order/import_test_params?order_id=${id || route.params.id}`,
     });
 
     if (response.code === 1 && response.data && Array.isArray(response.data.list)) {
       tableData.value = response.data.list;
-    } else {
-      // ElMessage.error(response.msg || "获取数据失败");
     }
   } catch (error) {
     console.error("Error fetching table data:", error);
-    ElMessage.error("获取表格数据失败");
+
   }
 };
 
 const backStepOne = () => {
-  router.push("/trust-add-one");
+  const id = route.params.id;
+  router.push(`/trust-add-one${id ? `/${id}` : ''}`);
 };
 
 onMounted(() => {
-  fetchTableData();
+  if (route.params.id) {
+    fetchTableData();
+  }
 });
 </script>
 

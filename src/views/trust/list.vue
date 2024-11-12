@@ -172,6 +172,7 @@ const onPageChange = (page: any) => {
 const handleAdd = () => {
   console.log("Add new item");
   localStorage.removeItem("draft");
+  localStorage.removeItem("order_id");
   router.push("/trust-add-one");
 };
 
@@ -235,7 +236,9 @@ const handleCopy = (row: any) => {
 
 const handleEdit = (row: any) => {
   console.log("Edit:", row);
-  router.push(`/trust-edit/${row.id}`);
+  localStorage.removeItem("draft");
+  localStorage.removeItem("order_id");
+  router.push(`/trust-add-one/${row.id}`);
 };
 const handleTask = (row: any) => {
   console.log("Task:", row);
