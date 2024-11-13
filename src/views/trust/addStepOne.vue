@@ -186,12 +186,17 @@ const checkTrustNumberUnique = async (rule, value, callback) => {
       method: 'GET',
       params: { type: 'order', sn: value }
     });
-    
+
     if (response.code === 0) {
       // if (response.data.exists) {
+
+      if (route.params.id) {
+        callback();
+      } else {
         callback(new Error('委托单号已存在'));
+      }
       // } else {
-        // callback();
+      // callback();
       // }
     } else {
       // callback(new Error(response.msg || '验证失败'));
