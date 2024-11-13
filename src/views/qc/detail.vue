@@ -18,7 +18,7 @@
         <el-descriptions-item label="项目名称">{{ taskDetail.order_info.project_name }}</el-descriptions-item>
         <el-descriptions-item label="有关科室">{{ taskDetail.qc_info.qc_related_office }}</el-descriptions-item>
         <el-descriptions-item label="采样地点">{{ taskDetail.order_info.sampling_address }}</el-descriptions-item>
-        <el-descriptions-item label="完成时间">{{ taskDetail.task_info.finish_time }}</el-descriptions-item>
+        <el-descriptions-item label="完成时间">{{ taskDetail.order_info.deadline }}</el-descriptions-item>
         <el-descriptions-item label="制单人">{{ taskDetail.task_info.createdby }}</el-descriptions-item>
         <el-descriptions-item label="制单时间">{{ taskDetail.qc_info.createtime }}</el-descriptions-item>
         <el-descriptions-item label="状态">

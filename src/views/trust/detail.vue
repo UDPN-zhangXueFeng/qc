@@ -39,7 +39,7 @@
               trustDetail.deadline
             }}</el-descriptions-item>
             <el-descriptions-item label="委托时间">{{
-              trustDetail.createtime
+              trustDetail.wttime
             }}</el-descriptions-item>
             <el-descriptions-item label="制单人">{{
               trustDetail.createdby
@@ -178,6 +178,7 @@ interface TrustDetail {
   client_email: string;
   handled_by: string;
   handled_by_tel: string;
+  wttime: string;
 }
 
 const trustDetail = ref<TrustDetail | null>(null);

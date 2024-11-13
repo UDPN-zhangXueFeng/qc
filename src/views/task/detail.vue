@@ -32,9 +32,9 @@
             <el-descriptions-item label="关联委托单号">{{ taskDetail.order.order_number }}</el-descriptions-item>
             <el-descriptions-item label="检测周期">{{ taskDetail.order.test_period }}</el-descriptions-item>
             <el-descriptions-item label="有关科室">{{ taskDetail.order.task_related_office }}</el-descriptions-item>
-            <el-descriptions-item label="采样地点">{{ taskDetail.order.deadline }}</el-descriptions-item>
+            <el-descriptions-item label="采样地点">{{ taskDetail.order.task_address }}</el-descriptions-item>
             <el-descriptions-item label="制单人">{{ taskDetail.order.createdby }}</el-descriptions-item>
-            <el-descriptions-item label="制单时间">{{ taskDetail.order.createdby }}</el-descriptions-item>
+            <el-descriptions-item label="制单时间">{{ taskDetail.order.createtime }}</el-descriptions-item>
             <el-descriptions-item label="状态">
               <el-tag :type="getStatusType(taskDetail.order.status)">
                 {{ taskDetail.order.status === '1' ? '待接收' : taskDetail.order.status === '2' ? '已接收' :

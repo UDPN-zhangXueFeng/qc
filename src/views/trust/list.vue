@@ -106,7 +106,7 @@ const tableColumns = [
   { prop: "sampling_or_delivery_text", label: "采样/送样", width: "120" },
   { prop: "is_subcontract_text", label: "是否分包", width: "100" },
   { prop: "deadline", label: "完成时间", width: "180" },
-  { prop: "createtime", label: "委托时间", width: "180" },
+  { prop: "wttime", label: "委托时间", width: "180" },
   {
     prop: "status", label: "状态", width: "100", slot: "status", formatter: (row: any) => {
       return row.status === null ? "--" : row.status_text
